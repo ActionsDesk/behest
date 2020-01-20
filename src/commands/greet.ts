@@ -1,16 +1,15 @@
-import * as github from '@actions/github'
+import CommandContext from './context'
 
-interface GreetArgs {
-  context: {
-    client: github.GitHub
-    owner: string
-    repo: string
-    issueNumber: number
-  }
+/**
+ * Greet a user by username
+ *
+ * @param {CommandContext} context context for this command execution
+ * @param {string} username the user to invite
+ */
+export default async function greet(
+  {client, owner, repo, issueNumber}: CommandContext,
   username: string
-}
-
-export default async function greet({context: {client, owner, repo, issueNumber}, username}: GreetArgs): Promise<void> {
+): Promise<void> {
   const body = `:wave: Hey @${username}!`
 
   // eslint-disable-next-line @typescript-eslint/camelcase

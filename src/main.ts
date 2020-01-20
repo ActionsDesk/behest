@@ -2,14 +2,14 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 import commands from './commands'
 
-async function run(): Promise<void> {
+export default async function main(): Promise<void> {
   try {
     const token = core.getInput('token', {required: true})
     const adminToken = core.getInput('admin_token', {required: true})
     const repository = process.env.GITHUB_REPOSITORY
 
     if (!repository) {
-      throw new Error('GITHUB_REPOSITORY not found in environment variables')
+      throw new Error('GITHUB_REPOSITORY not found in environment variables!')
     }
 
     if (!github.context.payload.issue) {
@@ -25,8 +25,11 @@ async function run(): Promise<void> {
 
     if (comment.body.startsWith('/')) {
       const parts: string[] = comment.body.split(/\s+/)
-      const command = parts[0]
+      const command = parts[0].substring(1)
       const args = parts.slice(1)
+
+      core.debug(`commands available: [${Object.keys(commands).join(', ')}]`)
+      core.debug(`running ${command}(${args})`)
 
       commands[command]({client, adminClient, owner, repo, issueNumber: number}, ...args)
     }
@@ -35,4 +38,6 @@ async function run(): Promise<void> {
   }
 }
 
-run()
+if (require.main === module) {
+  main()
+}

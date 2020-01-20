@@ -3070,7 +3070,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-function greet({ context: { client, owner, repo, issueNumber }, username }) {
+/**
+ * Greet a user by username
+ *
+ * @param {CommandContext} context context for this command execution
+ * @param {string} username the user to invite
+ */
+function greet({ client, owner, repo, issueNumber }, username) {
     return __awaiter(this, void 0, void 0, function* () {
         const body = `:wave: Hey @${username}!`;
         // eslint-disable-next-line @typescript-eslint/camelcase
@@ -3235,7 +3241,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
 const github = __importStar(__webpack_require__(469));
 const commands_1 = __importDefault(__webpack_require__(163));
-function run() {
+function main() {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -3243,7 +3249,7 @@ function run() {
             const adminToken = core.getInput('admin_token', { required: true });
             const repository = process.env.GITHUB_REPOSITORY;
             if (!repository) {
-                throw new Error('GITHUB_REPOSITORY not found in environment variables');
+                throw new Error('GITHUB_REPOSITORY not found in environment variables!');
             }
             if (!github.context.payload.issue) {
                 throw new Error('GitHub Issue payload not found');
@@ -3255,8 +3261,10 @@ function run() {
             const { comment } = github.context.payload;
             if (comment.body.startsWith('/')) {
                 const parts = comment.body.split(/\s+/);
-                const command = parts[0];
+                const command = parts[0].substring(1);
                 const args = parts.slice(1);
+                core.debug(`commands available: [${Object.keys(commands_1.default).join(', ')}]`);
+                core.debug(`running ${command}(${args})`);
                 commands_1.default[command]({ client, adminClient, owner, repo, issueNumber: number }, ...args);
             }
         }
@@ -3265,7 +3273,10 @@ function run() {
         }
     });
 }
-run();
+exports.default = main;
+if (require.main === require.cache[eval('__filename')]) {
+    main();
+}
 
 
 /***/ }),
@@ -10731,7 +10742,7 @@ function hasNextPage (link) {
 /***/ }),
 
 /***/ 935:
-/***/ (function(__unusedmodule, exports) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
@@ -10744,22 +10755,60 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-function invite({ context: { adminClient, client, owner, repo, issueNumber }, username, email }) {
+const core = __importStar(__webpack_require__(470));
+/**
+ * Detects the format of a given subject, either a username
+ * or email address.
+ *
+ * @param {string} subject username or email address
+ * @returns {string} format of subject
+ */
+function detectSubjectFormat(subject) {
+    if (subject.indexOf('@') > 1) {
+        return 'email';
+    }
+    return 'username';
+}
+/**
+ * Normalize a github username by stripping leading `@`
+ *
+ * @param {string} username GitHub username
+ * @returns {string} normalized username
+ */
+function normalizeUsername(username) {
+    return username.replace(/@/g, '');
+}
+/**
+ * Send an organization invitation by username or email
+ *
+ * @param {CommandContext} context context for this command execution
+ * @param {string} subject the username or email address to invite
+ */
+function invite({ adminClient, client, owner, repo, issueNumber }, subject) {
     return __awaiter(this, void 0, void 0, function* () {
-        let subject;
-        if (username) {
-            subject = username;
+        core.debug(`inviting subject: ${subject}`);
+        if (!subject) {
+            throw new Error('username or email is required');
+        }
+        const format = detectSubjectFormat(subject);
+        if (format === 'username') {
+            const username = normalizeUsername(subject);
+            core.debug(`inviting by username: ${username}`);
             const userResponse = yield client.users.getByUsername({ username });
             // eslint-disable-next-line @typescript-eslint/camelcase
             yield adminClient.orgs.createInvitation({ org: owner, invitee_id: userResponse.data.id });
         }
-        else if (email) {
-            subject = email;
-            yield adminClient.orgs.createInvitation({ org: owner, email });
-        }
         else {
-            throw new Error('username or email is required');
+            core.debug(`inviting by email: ${subject}`);
+            yield adminClient.orgs.createInvitation({ org: owner, email: subject });
         }
         yield client.issues.createComment({
             owner,
