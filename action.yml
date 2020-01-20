@@ -1,10 +1,12 @@
+---
 name: 'Your name here'
 description: 'Provide a description here'
 author: 'Your name or organization here'
 inputs:
-  myInput:              # change this
-    description: 'input description here'
-    default: 'default value if applicable'
+  token:
+    description: 'default actions-bot token'
+  admin_token:
+    description: 'token with admin access to org'
 runs:
   using: 'node12'
   main: 'dist/index.js'
