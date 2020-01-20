@@ -1,4 +1,5 @@
 import * as core from '@actions/core'
+
 import CommandContext from './context'
 
 /**
@@ -33,10 +34,16 @@ function normalizeUsername(username: string): string {
  * @param {string} subject the username or email address to invite
  */
 export default async function invite(
-  {adminClient, client, owner, repo, issueNumber}: CommandContext,
+  {adminClient, client, user, owner, repo, issueNumber}: CommandContext,
   subject: string
 ): Promise<void> {
   core.debug(`inviting subject: ${subject}`)
+
+  const membershipResponse = await adminClient.orgs.getMembership({org: owner, username: user})
+
+  if (membershipResponse.data.role !== 'admin') {
+    throw new Error(`${user} cannot invite new members.`)
+  }
 
   if (!subject) {
     throw new Error('username or email is required')
