@@ -3260,12 +3260,13 @@ function main() {
             const [owner, repo] = (_a = repository) === null || _a === void 0 ? void 0 : _a.split('/');
             const { comment } = github.context.payload;
             if (comment.body.startsWith('/')) {
+                const user = comment.user.login;
                 const parts = comment.body.split(/\s+/);
                 const command = parts[0].substring(1);
                 const args = parts.slice(1);
                 core.debug(`commands available: [${Object.keys(commands_1.default).join(', ')}]`);
                 core.debug(`running ${command}(${args})`);
-                commands_1.default[command]({ client, adminClient, owner, repo, issueNumber: number }, ...args);
+                commands_1.default[command]({ client, adminClient, user, owner, repo, issueNumber: number }, ...args);
             }
         }
         catch (error) {
@@ -10792,9 +10793,13 @@ function normalizeUsername(username) {
  * @param {CommandContext} context context for this command execution
  * @param {string} subject the username or email address to invite
  */
-function invite({ adminClient, client, owner, repo, issueNumber }, subject) {
+function invite({ adminClient, client, user, owner, repo, issueNumber }, subject) {
     return __awaiter(this, void 0, void 0, function* () {
         core.debug(`inviting subject: ${subject}`);
+        const membershipResponse = yield adminClient.orgs.getMembership({ org: owner, username: user });
+        if (membershipResponse.data.role !== 'admin') {
+            throw new Error(`${user} cannot invite new members.`);
+        }
         if (!subject) {
             throw new Error('username or email is required');
         }

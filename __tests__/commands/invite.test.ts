@@ -4,6 +4,7 @@ import * as github from '@actions/github'
 import invite from '../../src/commands/invite'
 
 const UsersGetByUsernameResponse = require('../fixtures/UsersGetByUsernameResponse.success.json')
+const OrgsGetMembershipResponse = require('../fixtures/OrgsGetMembershipResponse.success.json')
 
 jest.mock('@actions/core')
 jest.mock('@actions/github')
@@ -23,8 +24,10 @@ describe('invite', () => {
   test('invites by username', async () => {
     const mockGetByUsername = jest.spyOn(client.users, 'getByUsername')
     const mockCreateInvitation = jest.spyOn(adminClient.orgs, 'createInvitation')
+    const mockGetMembership = jest.spyOn(adminClient.orgs, 'getMembership')
 
     mockGetByUsername.mockImplementation(() => UsersGetByUsernameResponse)
+    mockGetMembership.mockImplementation(() => OrgsGetMembershipResponse)
 
     await invite(context, 'mona')
 

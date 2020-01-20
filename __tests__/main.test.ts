@@ -13,7 +13,7 @@ describe('main', () => {
     process.env.GITHUB_REPOSITORY = 'a/b'
 
     const mockSetFailed = jest.spyOn(core, 'setFailed')
-    github.context.payload = {comment: {body: ''}, issue: {number: 1}}
+    github.context.payload = {comment: {body: '', user: {login: 'mona'}}, issue: {number: 1}}
 
     function run() {
       return main()
