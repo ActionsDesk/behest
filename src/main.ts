@@ -6,6 +6,7 @@ export default async function main(): Promise<void> {
   try {
     const token = core.getInput('token', {required: true})
     const adminToken = core.getInput('admin_token', {required: true})
+    const serializedTeams = core.getInput('teams')
     const repository = process.env.GITHUB_REPOSITORY
 
     if (!repository) {
@@ -28,11 +29,15 @@ export default async function main(): Promise<void> {
       const parts: string[] = comment.body.split(/\s+/)
       const command = parts[0].substring(1)
       const args = parts.slice(1)
+      const teams = serializedTeams
+        .split(/\s+/)
+        .filter(item => typeof item === 'string' && item.length)
+        .map(item => item.trim())
 
       core.debug(`commands available: [${Object.keys(commands).join(', ')}]`)
       core.debug(`running ${command}(${args})`)
 
-      commands[command]({client, adminClient, user, owner, repo, issueNumber: number}, ...args)
+      commands[command]({client, adminClient, user, teams, owner, repo, issueNumber: number}, ...args)
     }
   } catch (error) {
     core.setFailed(error.message)

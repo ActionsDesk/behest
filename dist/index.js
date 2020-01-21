@@ -3247,6 +3247,7 @@ function main() {
         try {
             const token = core.getInput('token', { required: true });
             const adminToken = core.getInput('admin_token', { required: true });
+            const serializedTeams = core.getInput('teams');
             const repository = process.env.GITHUB_REPOSITORY;
             if (!repository) {
                 throw new Error('GITHUB_REPOSITORY not found in environment variables!');
@@ -3264,9 +3265,13 @@ function main() {
                 const parts = comment.body.split(/\s+/);
                 const command = parts[0].substring(1);
                 const args = parts.slice(1);
+                const teams = serializedTeams
+                    .split(/\s+/)
+                    .filter(item => typeof item === 'string' && item.length)
+                    .map(item => item.trim());
                 core.debug(`commands available: [${Object.keys(commands_1.default).join(', ')}]`);
                 core.debug(`running ${command}(${args})`);
-                commands_1.default[command]({ client, adminClient, user, owner, repo, issueNumber: number }, ...args);
+                commands_1.default[command]({ client, adminClient, user, teams, owner, repo, issueNumber: number }, ...args);
             }
         }
         catch (error) {
@@ -10788,16 +10793,49 @@ function normalizeUsername(username) {
     return username.replace(/@/g, '');
 }
 /**
+ *
+ * @param {github.GitHub} client Octokit instance that has read access to org and team
+ * @param {string} username
+ * @param org
+ * @param teams
+ */
+function isTeamMember(client, username, org, teams) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let i;
+        for (i = 0; i < teams.length; i++) {
+            const team = teams[i];
+            try {
+                // eslint-disable-next-line @typescript-eslint/camelcase
+                const teamMembershipResponse = yield client.teams.getMembershipInOrg({ org, username, team_slug: team });
+                if (teamMembershipResponse.data.state === 'active') {
+                    return true;
+                }
+            }
+            catch (err) {
+                // HTTP 404 just means user is not member of team
+                if (err.status === 404) {
+                    return false;
+                }
+                else {
+                    throw err;
+                }
+            }
+        }
+        return false;
+    });
+}
+/**
  * Send an organization invitation by username or email
  *
  * @param {CommandContext} context context for this command execution
  * @param {string} subject the username or email address to invite
  */
-function invite({ adminClient, client, user, owner, repo, issueNumber }, subject) {
+function invite({ adminClient, client, user, teams, owner, repo, issueNumber }, subject) {
     return __awaiter(this, void 0, void 0, function* () {
         core.debug(`inviting subject: ${subject}`);
         const membershipResponse = yield adminClient.orgs.getMembership({ org: owner, username: user });
-        if (membershipResponse.data.role !== 'admin') {
+        const canExecuteCommand = (yield isTeamMember(adminClient, user, owner, teams)) || membershipResponse.data.role !== 'admin';
+        if (!canExecuteCommand) {
             throw new Error(`${user} cannot invite new members.`);
         }
         if (!subject) {

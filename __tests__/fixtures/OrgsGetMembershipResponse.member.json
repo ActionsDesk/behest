@@ -1,7 +1,7 @@
 {
   "data": {
     "url": "https://api.github.com/orgs/invitocat/memberships/defunkt",
-    "state": "pending",
+    "state": "active",
     "role": "admin",
     "organization_url": "https://api.github.com/orgs/invitocat",
     "organization": {

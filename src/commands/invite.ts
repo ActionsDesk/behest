@@ -1,3 +1,4 @@
+import * as github from '@actions/github'
 import * as core from '@actions/core'
 
 import CommandContext from './context'
@@ -28,20 +29,53 @@ function normalizeUsername(username: string): string {
 }
 
 /**
+ *
+ * @param {github.GitHub} client Octokit instance that has read access to org and team
+ * @param {string} username
+ * @param org
+ * @param teams
+ */
+async function isTeamMember(client: github.GitHub, username: string, org: string, teams: string[]): Promise<boolean> {
+  let i
+  for (i = 0; i < teams.length; i++) {
+    const team = teams[i]
+
+    try {
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      const teamMembershipResponse = await client.teams.getMembershipInOrg({org, username, team_slug: team})
+      if (teamMembershipResponse.data.state === 'active') {
+        return true
+      }
+    } catch (err) {
+      // HTTP 404 just means user is not member of team
+      if (err.status === 404) {
+        return false
+      } else {
+        throw err
+      }
+    }
+  }
+
+  return false
+}
+
+/**
  * Send an organization invitation by username or email
  *
  * @param {CommandContext} context context for this command execution
  * @param {string} subject the username or email address to invite
  */
 export default async function invite(
-  {adminClient, client, user, owner, repo, issueNumber}: CommandContext,
+  {adminClient, client, user, teams, owner, repo, issueNumber}: CommandContext,
   subject: string
 ): Promise<void> {
   core.debug(`inviting subject: ${subject}`)
 
   const membershipResponse = await adminClient.orgs.getMembership({org: owner, username: user})
+  const canExecuteCommand =
+    (await isTeamMember(adminClient, user, owner, teams)) || membershipResponse.data.role !== 'admin'
 
-  if (membershipResponse.data.role !== 'admin') {
+  if (!canExecuteCommand) {
     throw new Error(`${user} cannot invite new members.`)
   }
 

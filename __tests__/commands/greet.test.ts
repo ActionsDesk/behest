@@ -13,6 +13,7 @@ const context = {
   adminClient,
   client,
   user: 'mona',
+  teams: ['avengers'],
   owner: 'a',
   repo: 'b',
   issueNumber: 1
