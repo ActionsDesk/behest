@@ -10834,7 +10834,7 @@ function invite({ adminClient, client, user, teams, owner, repo, issueNumber }, 
     return __awaiter(this, void 0, void 0, function* () {
         core.debug(`inviting subject: ${subject}`);
         const membershipResponse = yield adminClient.orgs.getMembership({ org: owner, username: user });
-        const canExecuteCommand = (yield isTeamMember(adminClient, user, owner, teams)) || membershipResponse.data.role !== 'admin';
+        const canExecuteCommand = (yield isTeamMember(adminClient, user, owner, teams)) || membershipResponse.data.role === 'admin';
         if (!canExecuteCommand) {
             throw new Error(`${user} cannot invite new members.`);
         }

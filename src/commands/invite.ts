@@ -73,7 +73,7 @@ export default async function invite(
 
   const membershipResponse = await adminClient.orgs.getMembership({org: owner, username: user})
   const canExecuteCommand =
-    (await isTeamMember(adminClient, user, owner, teams)) || membershipResponse.data.role !== 'admin'
+    (await isTeamMember(adminClient, user, owner, teams)) || membershipResponse.data.role === 'admin'
 
   if (!canExecuteCommand) {
     throw new Error(`${user} cannot invite new members.`)
