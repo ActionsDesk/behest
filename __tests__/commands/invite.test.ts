@@ -80,4 +80,23 @@ describe('invite', () => {
       invitee_id: UsersGetByUsernameResponse.data.id
     })
   })
+
+  test('throws on non-admin, non-team member attempts', async () => {
+    const mockGetByUsername = jest.spyOn(client.users, 'getByUsername')
+    const mockCreateInvitation = jest.spyOn(adminClient.orgs, 'createInvitation')
+    const mockGetMembership = jest.spyOn(adminClient.orgs, 'getMembership')
+    const mockGetMembershipInOrg = jest.spyOn(adminClient.teams, 'getMembershipInOrg')
+
+    mockGetByUsername.mockImplementation(() => UsersGetByUsernameResponse)
+    mockGetMembership.mockImplementation(() => OrgsGetMembershipMemberResponse)
+
+    await invite(context, 'mona')
+
+    expect(mockCreateInvitation.mock.calls.length).toEqual(1)
+    expect(mockCreateInvitation.mock.calls[0][0]).toEqual({
+      org: context.owner,
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      invitee_id: UsersGetByUsernameResponse.data.id
+    })
+  })
 })
