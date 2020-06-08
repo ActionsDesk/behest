@@ -3,10 +3,15 @@ name: 'Your name here'
 description: 'Provide a description here'
 author: 'Your name or organization here'
 inputs:
+  teams:
+    description: 'authorized teams to execute an action'
+    required: false
   token:
     description: 'default actions-bot token'
+    required: true
   admin_token:
     description: 'token with admin access to org'
+    required: true
 runs:
   using: 'node12'
   main: 'dist/index.js'
