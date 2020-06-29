@@ -110,13 +110,18 @@ export default async function kick(
 
   const username = normalizeUsername(subject)
   core.debug(`inviting by username: ${username}`)
-  await removeUserFromOrg(adminClient, owner, username)
+  try {
+    await removeUserFromOrg(adminClient, owner, username)
 
-  await client.issues.createComment({
-    owner,
-    repo,
-    // eslint-disable-next-line @typescript-eslint/camelcase
-    issue_number: issueNumber,
-    body: `${subject} has been kicked!`
-  })
+    await client.issues.createComment({
+      owner,
+      repo,
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      issue_number: issueNumber,
+      body: `${subject} has been kicked!`
+    })
+  } catch (error) {
+    core.error(`Error recieved while kicking ${username}`)
+    core.error(error)
+  }
 }

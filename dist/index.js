@@ -3157,14 +3157,20 @@ function kick({ adminClient, client, user, teams, owner, repo, issueNumber }, su
         }
         const username = normalizeUsername(subject);
         core.debug(`inviting by username: ${username}`);
-        yield removeUserFromOrg(adminClient, owner, username);
-        yield client.issues.createComment({
-            owner,
-            repo,
-            // eslint-disable-next-line @typescript-eslint/camelcase
-            issue_number: issueNumber,
-            body: `${subject} has been kicked!`
-        });
+        try {
+            yield removeUserFromOrg(adminClient, owner, username);
+            yield client.issues.createComment({
+                owner,
+                repo,
+                // eslint-disable-next-line @typescript-eslint/camelcase
+                issue_number: issueNumber,
+                body: `${subject} has been kicked!`
+            });
+        }
+        catch (error) {
+            core.error(`Error recieved while kicking ${username}`);
+            core.error(error);
+        }
     });
 }
 exports.default = kick;
