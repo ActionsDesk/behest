@@ -3,27 +3,23 @@ import * as core from '@actions/core'
 
 import CommandContext from './context'
 
-
 /**
  * Removes users by trying to remove collaborators and then members if it fails
- * @param adminClient 
- * @param owner 
- * @param user 
  */
-async function removeUserFromOrg (adminClient: github.GitHub, owner: string, user: string ) {
+async function removeUserFromOrg(adminClient: github.GitHub, owner: string, user: string): Promise<void> {
   try {
     await adminClient.orgs.removeOutsideCollaborator({
       org: owner,
       username: user
     })
-    console.log(`Successfully removed ${user} from Org: ${owner}`)
+    core.debug(`Successfully removed ${user} from Org: ${owner}`)
   } catch (error) {
     if (error.status === 422) {
       await adminClient.orgs.removeMembership({
         org: owner,
         username: user
       })
-      console.log(`Successfully removed ${user} from Org: ${owner}`)
+      core.debug(`Successfully removed ${user} from Org: ${owner}`)
     } else {
       throw error
     }
@@ -103,22 +99,18 @@ export default async function kick(
     !(await isTeamMember(adminClient, user, owner, teams)) || membershipResponse.data.role !== 'admin'
 
   if (!canExecuteCommand) {
-    throw new Error(`${user} cannot kick this member, either they are not part of the organization or they are an Admin.`)
+    throw new Error(
+      `${user} cannot kick this member, either they are not part of the organization or they are an Admin.`
+    )
   }
 
   if (!subject || detectSubjectFormat(subject) === 'email') {
     throw new Error('username is required')
   }
 
-  const format = detectSubjectFormat(subject)
-
   const username = normalizeUsername(subject)
   core.debug(`inviting by username: ${username}`)
-  const userResponse = await client.users.getByUsername({username})
-
-  // eslint-disable-next-line @typescript-eslint/camelcase
-  await removeUserFromOrg(adminClient, owner, user )
-  
+  await removeUserFromOrg(adminClient, owner, username)
 
   await client.issues.createComment({
     owner,
