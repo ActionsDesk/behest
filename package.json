@@ -26,7 +26,8 @@
   "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.2.1",
-    "@actions/github": "^2.0.1"
+    "@actions/github": "^2.0.1",
+    "fetch-error": "^1.0.0"
   },
   "devDependencies": {
     "@types/jest": "^24.9.0",

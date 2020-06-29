@@ -3,6 +3,7 @@ import * as core from '@actions/core'
 
 import CommandContext from './context'
 
+
 /**
  * Removes users by trying to remove collaborators and then members if it fails
  * @param adminClient 
@@ -22,7 +23,7 @@ async function removeUserFromOrg (adminClient: github.GitHub, owner: string, use
         org: owner,
         username: user
       })
-      console.log(`Successfully removed ${user} from Org: ${org}`)
+      console.log(`Successfully removed ${user} from Org: ${owner}`)
     } else {
       throw error
     }
@@ -105,7 +106,7 @@ export default async function kick(
     throw new Error(`${user} cannot kick this member, either they are not part of the organization or they are an Admin.`)
   }
 
-  if (!subject && detectSubjectFormat(subject) === 'username') {
+  if (!subject || detectSubjectFormat(subject) === 'email') {
     throw new Error('username is required')
   }
 
