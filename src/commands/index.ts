@@ -1,5 +1,6 @@
 import greet from './greet'
 import invite from './invite'
+import kick from './kick'
 
 interface CommandRegistry {
   [key: string]: Function
@@ -7,7 +8,8 @@ interface CommandRegistry {
 
 const registry: CommandRegistry = {
   greet,
-  invite
+  invite,
+  kick
 }
 
 export default registry
