@@ -90,7 +90,7 @@ describe('invite', () => {
     mockGetByUsername.mockImplementation(() => UsersGetByUsernameResponse)
     mockGetMembership.mockImplementation(() => OrgsGetMembershipMemberResponse)
 
-    await invite(context, 'mona')
+    const out = await invite(context, 'mona')
 
     expect(mockCreateInvitation.mock.calls.length).toEqual(1)
     expect(mockCreateInvitation.mock.calls[0][0]).toEqual({
