@@ -95,13 +95,12 @@ export default async function kick(
   core.debug(`kicking subject: ${subject}`)
 
   const membershipResponse = await adminClient.orgs.getMembership({org: owner, username: user})
+
   const canExecuteCommand =
-    !(await isTeamMember(adminClient, user, owner, teams)) || membershipResponse.data.role !== 'admin'
+    (await isTeamMember(adminClient, user, owner, teams)) || membershipResponse.data.role === 'admin'
 
   if (!canExecuteCommand) {
-    throw new Error(
-      `${user} cannot kick this member, either they are not part of the organization or they are an Admin.`
-    )
+    throw new Error(`${user} cannot kick members.`)
   }
 
   if (!subject || detectSubjectFormat(subject) === 'email') {
@@ -109,7 +108,7 @@ export default async function kick(
   }
 
   const username = normalizeUsername(subject)
-  core.debug(`inviting by username: ${username}`)
+  core.debug(`kicking by username: ${username}`)
   try {
     await removeUserFromOrg(adminClient, owner, username)
 
