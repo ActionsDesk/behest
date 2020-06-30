@@ -17,7 +17,7 @@ const adminClient = new github.GitHub('dummy-token')
 const context = {
   adminClient,
   client,
-  user: 'mona',
+  user: 'Chocrates',
   teams: ['avengers'],
   owner: 'a',
   repo: 'b',

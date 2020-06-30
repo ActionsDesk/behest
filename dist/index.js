@@ -3148,15 +3148,15 @@ function kick({ adminClient, client, user, teams, owner, repo, issueNumber }, su
     return __awaiter(this, void 0, void 0, function* () {
         core.debug(`kicking subject: ${subject}`);
         const membershipResponse = yield adminClient.orgs.getMembership({ org: owner, username: user });
-        const canExecuteCommand = !(yield isTeamMember(adminClient, user, owner, teams)) || membershipResponse.data.role !== 'admin';
+        const canExecuteCommand = (yield isTeamMember(adminClient, user, owner, teams)) || membershipResponse.data.role === 'admin';
         if (!canExecuteCommand) {
-            throw new Error(`${user} cannot kick this member, either they are not part of the organization or they are an Admin.`);
+            throw new Error(`${user} cannot kick members.`);
         }
         if (!subject || detectSubjectFormat(subject) === 'email') {
             throw new Error('username is required');
         }
         const username = normalizeUsername(subject);
-        core.debug(`inviting by username: ${username}`);
+        core.debug(`kicking by username: ${username}`);
         try {
             yield removeUserFromOrg(adminClient, owner, username);
             yield client.issues.createComment({
