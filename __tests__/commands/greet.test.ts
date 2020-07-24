@@ -16,7 +16,9 @@ const context = {
   teams: ['avengers'],
   owner: 'a',
   repo: 'b',
-  issueNumber: 1
+  issueNumber: 1,
+  issueBody: [],
+  basepath: '.'
 }
 
 describe('greet', () => {
@@ -31,7 +33,7 @@ describe('greet', () => {
       repo: context.repo,
       // eslint-disable-next-line @typescript-eslint/camelcase
       issue_number: context.issueNumber,
-      body: `:wave: Hey @mona!`
+      body: `:wave: Hey @mona! It's working <br><br> :tada: :tada:`
     })
   })
 })

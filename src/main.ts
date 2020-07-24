@@ -26,9 +26,9 @@ export default async function main(): Promise<void> {
 
     if (comment.body.startsWith('/')) {
       const user = comment.user.login
-      const parts: string[] = comment.body.split(/\s+/)
+      const parts: string[] = comment.body.split(/\n/)[0].split(/\s+/) // just the args from the first line
       const command = parts[0].substring(1)
-      const args = parts.slice(1)
+      const args = parts.slice(1) // the rest of the line is args
       const teams = serializedTeams
         .split(/\s+/)
         .filter(item => typeof item === 'string' && item.length)
@@ -37,7 +37,20 @@ export default async function main(): Promise<void> {
       core.debug(`commands available: [${Object.keys(commands).join(', ')}]`)
       core.debug(`running ${command}(${args})`)
 
-      commands[command]({client, adminClient, user, teams, owner, repo, issueNumber: number}, ...args)
+      commands[command](
+        {
+          client,
+          adminClient,
+          user,
+          teams,
+          owner,
+          repo,
+          issueNumber: number,
+          body: comment.body.split(/\n/),
+          basepath: '.'
+        },
+        ...args
+      )
     }
   } catch (error) {
     core.setFailed(error.message)
