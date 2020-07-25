@@ -46,7 +46,7 @@ export default async function main(): Promise<void> {
           owner,
           repo,
           issueNumber: number,
-          body: comment.body.split(/\n/),
+          issueBody: comment.body.split(/\n/),
           basepath: '.'
         },
         ...args
