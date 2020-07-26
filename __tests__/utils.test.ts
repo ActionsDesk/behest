@@ -1,0 +1,122 @@
+jest.mock('@actions/github')
+const {GitHub, context} = require('@actions/github')
+
+import * as utils from '../src/utils'
+
+const GetIssueResponse = require('./fixtures/GetIssueResponse.json')
+const client = new GitHub('dummy-token')
+
+function getRandomNumber(): Number {
+  return Math.floor(Math.random() * 100)
+}
+describe('utils.js tests', () => {
+  beforeEach(() => {
+    context.repo = {
+      owner: 'owner',
+      repo: 'repo'
+    }
+    process.env.INPUT_TOKEN = 'NOT-A-TOKEN'
+    process.env.INPUT_ADMIN_TOKEN = 'NOT-A-TOKEN'
+    const github = {
+      issues: {
+        create: jest.fn().mockReturnValueOnce(getRandomNumber())
+      }
+    }
+    GitHub.mockImplementation(() => github)
+  })
+
+  test('returns a GitHub Admin client', async () => {
+    const github = utils.getAdminClient()
+    expect(github).toBeInstanceOf(Object)
+  })
+
+  test('returns a GitHub client', async () => {
+    const github = utils.getClient()
+    expect(github).toBeInstanceOf(Object)
+  })
+
+  test('utils create getnwo no name', async () => {
+    const nwo: utils.NWO = utils.getNWO('https://github.com/lslsls')
+    expect(nwo).toEqual({
+      name: '',
+      owner: 'lslsls'
+    })
+  })
+
+  test('utils create getnwo bad uri', async () => {
+    const nwo: utils.NWO = utils.getNWO('lslsls')
+    expect(nwo).toEqual({
+      name: '',
+      owner: ''
+    })
+  })
+
+  test('utils create getnwo name and owner', async () => {
+    const nwo: utils.NWO = utils.getNWO('https://github.com/a/b')
+    expect(nwo).toEqual({
+      name: 'b',
+      owner: 'a'
+    })
+  })
+
+  test('utils get issue html url', async () => {
+    const mockGetIssue = jest.spyOn(client.issues, 'get')
+    mockGetIssue.mockImplementation(() => GetIssueResponse)
+
+    const url = await utils.getIssueHtmlUrl({owner: 'a', repo: 'b', issue_number: 5})
+
+    expect(mockGetIssue.mock.calls.length).toEqual(0)
+    expect(url).toEqual('https://github.com/a/b/issues/5')
+  })
+
+  test('utils parseExtraArgs', async () => {
+    const body: string[] = ['/foo command', 'arg1', 'arg2', '/endfoo']
+    const result: string[] = utils.parseExtraArgs(body, 'foo')
+    expect(result).toEqual(['arg1', 'arg2'])
+  })
+
+  test('utils parseExtraArgs with no ending', async () => {
+    const body: string[] = ['/foo command', 'arg1', 'arg2']
+    const result: string[] = utils.parseExtraArgs(body, 'foo')
+    expect(result).toEqual(['arg1', 'arg2'])
+  })
+
+  test('utils parseExtraArgs with no arguments', async () => {
+    const body: string[] = ['/foo command']
+    const result: string[] = utils.parseExtraArgs(body, 'foo')
+    expect(result).toEqual([])
+  })
+
+  test('utils parseExtraArgs with no extra message after ending', async () => {
+    const body: string[] = ['/foo command', 'arg1', 'arg2', '/endfoo', 'extra message']
+    const result: string[] = utils.parseExtraArgs(body, 'foo')
+    expect(result).toEqual(['arg1', 'arg2'])
+  })
+
+  test('utils parse out yaml from body', async () => {
+    const body: string = '---\n' + 'name: some name\n' + 'foo: bar\n' + '\n' + '---\n' + '\n' + '# more text\n'
+    const o = utils.parseYamlFromText(body)
+    expect(o).toBeInstanceOf(Object)
+    expect(o.name).toEqual('some name')
+    expect(o.foo).toEqual('bar')
+  })
+
+  test('utils parse out the body from yaml', async () => {
+    const body: string =
+      '---\n' + 'name: some name\n' + 'foo: bar\n' + '\n' + '---\n' + '\n# more text\n' + 'this is a message\n<br>'
+    const subbody: string = utils.parseBodyFromText(body)
+    expect(subbody).toEqual('\n# more text\nthis is a message\n<br>')
+  })
+
+  test('utils parse out yaml from body when no yaml', async () => {
+    const body: string = '# more text\n'
+    const o = utils.parseYamlFromText(body)
+    expect(o).toEqual(null)
+  })
+
+  test('utils parse out the body from yaml when no yaml', async () => {
+    const body: string = '\n# more text\n' + 'this is a message\n<br>'
+    const subbody: string = utils.parseBodyFromText(body)
+    expect(subbody).toEqual('\n# more text\nthis is a message\n<br>')
+  })
+})

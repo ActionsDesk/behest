@@ -1,73 +1,58 @@
-import * as fs from 'fs'
 import * as path from 'path'
+import * as fs from 'fs'
 import * as core from '@actions/core'
+import * as github from '@actions/github'
+import * as utils from '../utils'
 import CommandContext from './context'
 
-export const {stat} = fs.promises
-
-export interface NWO {
-  name: string
-  owner: string
+/**
+ * get the title from the body
+ * Otherwise returns the default issues body title
+ *
+ * @param {body} issue body
+ * @returns {string} a title
+ */
+function getTitleFromBody(body: string): string {
+  const result = 'Issues Create Action'
+  const json = utils.parseYamlFromText(body)
+  if (json === null) {
+    return result
+  } else {
+    try {
+      return json.title === undefined ? result : json.title
+    } catch {
+      return result
+    }
+  }
 }
 
 /**
- * get a name with owner
+ * create an issue and continue on failure
  *
- * @param {string} git url
+ * @param {utils.NWO} name with owner
+ * @param {string} title for the issue
+ * @param {body} issue body
+ * @returns {string} a message to capture
  */
-export function getnwo(uri: string): NWO {
+async function CreateIssue(nwo: utils.NWO, title: string, body: string): Promise<string> {
   try {
-    const url = new URL(uri)
-    const nwo: NWO = {name: url.pathname.split('/')[2], owner: url.pathname.split('/')[1]}
-    // sanatize
-    nwo.name = typeof nwo.name == 'undefined' ? '' : nwo.name
-    nwo.owner = typeof nwo.owner == 'undefined' ? '' : nwo.owner
-    return nwo
+    body = utils.parseBodyFromText(body)
+    // normal token would not have issues access to other repos
+    const octokit: github.GitHub = utils.getAdminClient()
+    const issue = await octokit.issues.create({
+      title: `${title} for ${nwo.owner}/${nwo.name}`,
+      body,
+      owner: nwo.owner,
+      repo: nwo.name
+      // assignees: getElements(assignees),
+      // labels: getElements(labels)
+    })
+    core.info(`New issue created ${issue.data.number}`)
+    return `- Issue Reference for [\`${nwo.owner}/${nwo.name}\`](${issue.data.html_url})\n`
   } catch (error) {
     core.error(error)
-    return {name: '', owner: ''}
+    return `- Error in creating issue for \`${nwo.owner}/${nwo.name}\` [${error}]\n`
   }
-}
-
-/**
- * exists because it helps with better debugging
- *
- * @param {string} path to file
- */
-async function exists(fsPath: string): Promise<boolean> {
-  try {
-    core.debug(`checking ${fsPath}`)
-    await stat(fsPath)
-  } catch (err) {
-    core.debug(err)
-    if (err.code === 'ENOENT') {
-      return false
-    }
-    throw err
-  }
-  return true
-}
-
-/**
- * Parse For Issue URL's
- *
- * @param {string[]} body the issue body to parse
- */
-function parseURLs(body: string[]): string[] {
-  const giturls: string[] = []
-  let begin = false
-  for (const line of body) {
-    if (new RegExp('^/issuescreate.*').test(line)) {
-      begin = true
-      continue
-    }
-    if (begin && !new RegExp('^/endissuescreate.*').test(line)) {
-      giturls.push(line)
-    } else {
-      break
-    }
-  }
-  return giturls
 }
 
 /**
@@ -92,8 +77,8 @@ export default async function issuescreate(
   core.debug(fspec)
 
   // get the template conents if the message points to a path
-  core.info(`${fspec} --> ${await exists(fspec)}`)
-  if (await exists(fspec)) {
+  core.info(`${fspec} --> ${await utils.exists(fspec)}`)
+  if (await utils.exists(fspec)) {
     core.info(`working with template: ${fspec}`)
     body = fs.readFileSync(fspec, 'utf8')
   } else {
@@ -101,27 +86,27 @@ export default async function issuescreate(
     body = message
   }
 
-  // Get the list of repos from the current issue
   let comment = ''
+  // get url from issue
   // eslint-disable-next-line @typescript-eslint/camelcase
-  const issueUrl = (await client.issues.get({owner, repo, issue_number: issueNumber})).data.html_url
-  body = `${body}<br><br> - [Tracking Issue](${issueUrl})`
-  //TODO: extract the issue title from the body if one exist otherwise set a default
-  const giturls: string[] = parseURLs(issueBody)
+  const issueUrl: string = await utils.getIssueHtmlUrl({owner, repo, issue_number: issueNumber})
+  body = `${body}\n\n- [Tracking issue in \`${owner}/${repo}\`](${issueUrl})`
+
+  //extract the issue title from the body if one exist otherwise set a default
+  const title = getTitleFromBody(body)
+  const giturls: string[] = utils.parseExtraArgs(issueBody, 'issuescreate')
+
+  // Get the list of repos from the current issue
   for (const url of giturls) {
     // create new issue from body on nwo
-    const nwo: NWO = getnwo(url)
+    const nwo: utils.NWO = utils.getNWO(url)
     if (nwo.name !== '' && nwo.owner !== '') {
       // lets make that issue
-      const issue = await client.issues.create({
-        owner: nwo.owner,
-        repo: nwo.name,
-        title: 'Behest Issue Creation',
-        body
-      })
-      comment = `${comment}- Issue Rereferenc for [\`${nwo.owner}/${nwo.name}\`](${issue.data.html_url})<br>`
+      core.debug(`creating issue on repo -> ${nwo.owner}/${nwo.name}`)
+      comment = `${comment}${await CreateIssue(nwo, title, body)}`
     } else {
-      comment = `${comment}- Unable to create issue for ${url}<br>`
+      comment = `${comment}- Unable to create issue for ${url}\n`
+      core.debug(`bad ${nwo.owner}/${nwo.name} unable to create issue for ${url}`)
     }
   }
   // comment with existing issue link (we can just use the comment body)

@@ -23,7 +23,6 @@ export default async function main(): Promise<void> {
 
     const [owner, repo] = repository?.split('/')
     const {comment} = github.context.payload
-
     if (comment.body.startsWith('/')) {
       const user = comment.user.login
       const parts: string[] = comment.body.split(/\n/)[0].split(/\s+/) // just the args from the first line
