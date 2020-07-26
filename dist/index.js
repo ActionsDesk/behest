@@ -4980,7 +4980,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  */
 function greet({ client, owner, repo, issueNumber }, username) {
     return __awaiter(this, void 0, void 0, function* () {
-        const body = `:wave: Hey @${username}! It's working <br><br> :tada: :tada:`;
+        const body = `:wave: Hey @${username}!`;
         // eslint-disable-next-line @typescript-eslint/camelcase
         yield client.issues.createComment({ owner, repo, issue_number: issueNumber, body });
     });

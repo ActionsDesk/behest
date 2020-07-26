@@ -28,8 +28,7 @@
   "dependencies": {
     "yaml": "^1.10.0",
     "@actions/core": "^1.2.1",
-    "@actions/github": "^2.0.1",
-    "@actions/http-client": "^1.0.8"
+    "@actions/github": "^2.0.1"
   },
   "devDependencies": {
     "@types/jest": "^24.9.0",

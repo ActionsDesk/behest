@@ -10,7 +10,7 @@ export default async function greet(
   {client, owner, repo, issueNumber}: CommandContext,
   username: string
 ): Promise<void> {
-  const body = `:wave: Hey @${username}! It's working <br><br> :tada: :tada:`
+  const body = `:wave: Hey @${username}!`
 
   // eslint-disable-next-line @typescript-eslint/camelcase
   await client.issues.createComment({owner, repo, issue_number: issueNumber, body})
