@@ -149,12 +149,5 @@ export function parseYamlFromText(body: string): any {
  * @retruns {string} returns a string
  */
 export function parseBodyFromText(body: string): string {
-  let result = body // if anything goes wrong we return the body and warn
-  try {
-    const yamls: YAML.Document[] = YAML.parseAllDocuments(body)
-    result = body.replace(yamls[0].toString(), '').replace('---\n\n', '')
-  } catch (error) {
-    core.warning(error)
-  }
-  return result
+  return body.replace(/.*---\n[^)]*---\n.*/g, '')
 }

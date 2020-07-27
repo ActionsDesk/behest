@@ -1,6 +1,7 @@
 jest.mock('@actions/github')
 const {GitHub, context} = require('@actions/github')
 
+import * as fs from 'fs'
 import * as utils from '../src/utils'
 
 const GetIssueResponse = require('./fixtures/GetIssueResponse.json')
@@ -118,5 +119,15 @@ describe('utils.js tests', () => {
     const body: string = '\n# more text\n' + 'this is a message\n<br>'
     const subbody: string = utils.parseBodyFromText(body)
     expect(subbody).toEqual('\n# more text\nthis is a message\n<br>')
+  })
+
+  // this is a test for that for sapces at end of yaml
+  test('utils parse out the body with cleaned yaml', async () => {
+    // const body: string = ''
+    const body = fs.readFileSync('./__tests__/fixtures/issues/.github/workflows/ISSUE_TEMPLATE/template2.md', 'utf8')
+
+    const expects: string =
+      '\n' + '# Project #3 Message with $SERVICE\n' + '\n' + '👋🏼 Greetings,  🎉\n' + '\n' + '### Why me?\n'
+    expect(utils.parseBodyFromText(body)).toEqual(expects)
   })
 })

@@ -14029,15 +14029,7 @@ exports.parseYamlFromText = parseYamlFromText;
  * @retruns {string} returns a string
  */
 function parseBodyFromText(body) {
-    let result = body; // if anything goes wrong we return the body and warn
-    try {
-        const yamls = yaml_1.default.parseAllDocuments(body);
-        result = body.replace(yamls[0].toString(), '').replace('---\n\n', '');
-    }
-    catch (error) {
-        core.warning(error);
-    }
-    return result;
+    return body.replace(/.*---\n[^)]*---\n.*/g, '');
 }
 exports.parseBodyFromText = parseBodyFromText;
 
