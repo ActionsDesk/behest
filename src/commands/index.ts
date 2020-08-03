@@ -1,5 +1,6 @@
 import greet from './greet'
 import invite from './invite'
+import issuescreate from './issuescreate'
 import kick from './kick'
 
 interface CommandRegistry {
@@ -9,6 +10,7 @@ interface CommandRegistry {
 const registry: CommandRegistry = {
   greet,
   invite,
+  issuescreate,
   kick
 }
 

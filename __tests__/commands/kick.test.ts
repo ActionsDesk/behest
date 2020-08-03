@@ -21,7 +21,9 @@ const context = {
   teams: ['avengers'],
   owner: 'a',
   repo: 'b',
-  issueNumber: 1
+  issueNumber: 1,
+  issueBody: [],
+  basepath: '.'
 }
 
 describe('kick', () => {

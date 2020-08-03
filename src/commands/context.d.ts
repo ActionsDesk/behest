@@ -8,4 +8,6 @@ export default interface Context {
   owner: string
   repo: string
   issueNumber: number
+  issueBody: string[]
+  basepath: string // the relative root of the repo
 }
