@@ -32,3 +32,7 @@ jobs:
 ### Invoking Commands
 
 See [COMMANDS.md](COMMANDS.md)
+
+### Developing Behest
+
+Read the [development](DEVELOPMENT.md) for more info.
