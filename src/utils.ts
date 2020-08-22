@@ -56,6 +56,23 @@ export async function getIssueHtmlUrl(options: {owner: string; repo: string; iss
 }
 
 /**
+ * Get list of linked issues
+ * @param {owner, repo, issue_number}  the issue options
+ * @returns {string[]}
+ */
+export async function getLinkedIssues(options: {owner: string; repo: string; issue_number: number}): Promise<string> {
+  try {
+    const client: github.GitHub = getAdminClient()
+    const response = await client.issues.listEvents(options)
+    return `response ${options.owner}/${options.repo}/${options.issue_number} ${response}`
+  } catch (error) {
+    core.debug(`unable to listEvents from: ${options.owner}/${options.repo}/issues/${options.issue_number}`)
+    core.warning(error)
+    return ''
+  }
+}
+
+/**
  * get a name with owner
  *
  * @param {string} git url
