@@ -2,7 +2,7 @@ import * as fs from 'fs'
 import YAML from 'yaml'
 import * as github from '@actions/github'
 import * as core from '@actions/core'
-import { SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION } from 'constants'
+import {SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION} from 'constants'
 
 export const {stat} = fs.promises
 
