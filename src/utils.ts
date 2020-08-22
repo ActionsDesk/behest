@@ -2,7 +2,7 @@ import * as fs from 'fs'
 import YAML from 'yaml'
 import * as github from '@actions/github'
 import * as core from '@actions/core'
-import {toJSON} from 'yaml/util'
+import { SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION } from 'constants'
 
 export const {stat} = fs.promises
 
@@ -19,7 +19,7 @@ export interface NWO {
 export function getClient(): github.GitHub {
   const token: string = process.env.INPUT_TOKEN || ''
   core.debug(`trying with regular token -> ${token.length}`)
-  let client: github.GitHub = new github.GitHub(token)
+  const client: github.GitHub = new github.GitHub(token)
   core.debug('returning client')
   return client
 }
@@ -32,7 +32,7 @@ export function getClient(): github.GitHub {
 export function getAdminClient(): github.GitHub {
   const token: string = process.env.INPUT_ADMIN_TOKEN || ''
   core.debug(`trying with admin token -> ${token.length}`)
-  let client: github.GitHub = new github.GitHub(token)
+  const client: github.GitHub = new github.GitHub(token)
   core.debug('returning client')
   return client
 }
@@ -63,8 +63,19 @@ export async function getIssueHtmlUrl(options: {owner: string; repo: string; iss
 export async function getLinkedIssues(options: {owner: string; repo: string; issue_number: number}): Promise<string> {
   try {
     const client: github.GitHub = getAdminClient()
-    const response = await client.issues.listEvents(options)
-    return `response ${options.owner}/${options.repo}/${options.issue_number} ${response}`
+
+    for await (const response of client.paginate.iterator(
+      client.issues.listEvents({
+        owner: options.owner,
+        repo: options.repo,
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        issue_number: options.issue_number
+      })
+    )) {
+      // do whatever you want with each response, break out of the loop, etc.
+      core.debug(`${response}`)
+    }
+    return `response ${options.owner}/${options.repo}/${options.issue_number}`
   } catch (error) {
     core.debug(`unable to listEvents from: ${options.owner}/${options.repo}/issues/${options.issue_number}`)
     core.warning(error)
@@ -142,6 +153,7 @@ export function parseExtraArgs(body: string[], command: string): string[] {
  * @param {string} the body to parse
  * @retruns {YAML} returns the first document found
  */
+// eslint-disable-next-line @typescript-eslint/promise-function-async, @typescript-eslint/no-explicit-any
 export function parseYamlFromText(body: string): any {
   let result = JSON.parse('{}')
   try {
@@ -156,7 +168,6 @@ export function parseYamlFromText(body: string): any {
     core.warning(error)
     return result
   }
-  return result
 }
 
 /**

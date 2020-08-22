@@ -26,7 +26,6 @@ function getPostComment(issuelist: string[]): string[] {
   return []
 }
 
-
 /**
  * Get a list of issues from the current issue and post a comment
  *
@@ -44,6 +43,7 @@ export default async function issuescomment(
   core.debug(message)
   core.debug(basepath)
   core.debug(`/issuescomment working with ${message}`)
+  // eslint-disable-next-line @typescript-eslint/camelcase
   const res: string = await utils.getLinkedIssues({owner, repo, issue_number: issueNumber})
   core.debug(`LinkedIssues -> ${res}`)
 

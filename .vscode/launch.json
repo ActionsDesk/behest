@@ -5,16 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "node",
-            "request": "launch",
-            "name": "Launch Program",
+            "name": "Attach for npm run debug",
+            "port": 9229,
+            "request": "attach",
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}/lib/main.js",
-            "outFiles": [
-                "${workspaceFolder}/**/*.js"
-            ]
+            "type": "pwa-node"
         }
     ]
 }
