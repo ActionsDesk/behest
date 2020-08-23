@@ -64,20 +64,8 @@ export async function getLinkedIssues(options: {owner: string; repo: string; iss
   try {
     const client: github.GitHub = getAdminClient()
 
-    // for await (const response of client.paginate.iterator(
-    //   client.issues.listEvents({
-    //     owner: options.owner,
-    //     repo: options.repo,
-    //     // eslint-disable-next-line @typescript-eslint/camelcase
-    //     issue_number: options.issue_number
-    //   })
-    // )) {
-    //   // Handle the events
-    //   const data = await response.data
-    //   core.debug(`${data.event} ${data.id}`)
-    // }
-    let linkedissues: string[] = []
-    client.issues
+    const linkedIssues: string[] = []
+    await client.issues
       .listEventsForTimeline({
         owner: options.owner,
         repo: options.repo,
@@ -96,15 +84,12 @@ export async function getLinkedIssues(options: {owner: string; repo: string; iss
             if (item.type === 'issue' && item.issue.pull_request === undefined) {
               const issueNWO = item.issue.repository.full_name
               const issueURL = item.issue.html_url
-              return linkedissues.push(issueURL)
+              linkedIssues.push(issueURL)
             }
           }
         }
       })
-    // for (const issue of issues) {
-    //   core.debug(issue.id)
-    // }
-    return linkedissues
+    return linkedIssues
   } catch (error) {
     core.debug(`unable to listEvents from: ${options.owner}/${options.repo}/issues/${options.issue_number}`)
     core.warning(error)
