@@ -60,26 +60,58 @@ export async function getIssueHtmlUrl(options: {owner: string; repo: string; iss
  * @param {owner, repo, issue_number}  the issue options
  * @returns {string[]}
  */
-export async function getLinkedIssues(options: {owner: string; repo: string; issue_number: number}): Promise<string> {
+export async function getLinkedIssues(options: {owner: string; repo: string; issue_number: number}): Promise<string[]> {
   try {
     const client: github.GitHub = getAdminClient()
 
-    for await (const response of client.paginate.iterator(
-      client.issues.listEvents({
-        owner: options.owner,
-        repo: options.repo,
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        issue_number: options.issue_number
-      })
-    )) {
-      // do whatever you want with each response, break out of the loop, etc.
-      core.debug(`${response}`)
-    }
-    return `response ${options.owner}/${options.repo}/${options.issue_number}`
+    // for await (const response of client.paginate.iterator(
+    //   client.issues.listEvents({
+    //     owner: options.owner,
+    //     repo: options.repo,
+    //     // eslint-disable-next-line @typescript-eslint/camelcase
+    //     issue_number: options.issue_number
+    //   })
+    // )) {
+    //   // Handle the events
+    //   const data = await response.data
+    //   core.debug(`${data.event} ${data.id}`)
+    // }
+    const linkedissues: string[] = []
+    await client.paginate(
+      client.issues
+        .listEventsForTimeline({
+          owner: options.owner,
+          repo: options.repo,
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          issue_number: options.issue_number
+        })
+        .then(events => {
+          // issues is an array of all issue objects
+          core.debug(`${events}`)
+          for (const event of events.data) {
+            if (event.event === 'cross-referenced') {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const data: any = event
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const item: any = data.source
+              if (item.type === 'issue' && item.issue.pull_request === undefined) {
+                const issueNWO = item.issue.repository.full_name
+                const issueURL = item.issue.html_url
+                linkedissues.push(issueURL)
+                return linkedissues
+              }
+            }
+          }
+        })
+    )
+    // for (const issue of issues) {
+    //   core.debug(issue.id)
+    // }
+    return linkedissues
   } catch (error) {
     core.debug(`unable to listEvents from: ${options.owner}/${options.repo}/issues/${options.issue_number}`)
     core.warning(error)
-    return ''
+    return []
   }
 }
 
