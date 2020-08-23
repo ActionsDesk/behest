@@ -76,34 +76,31 @@ export async function getLinkedIssues(options: {owner: string; repo: string; iss
     //   const data = await response.data
     //   core.debug(`${data.event} ${data.id}`)
     // }
-    const linkedissues: string[] = []
-    await client.paginate(
-      client.issues
-        .listEventsForTimeline({
-          owner: options.owner,
-          repo: options.repo,
-          // eslint-disable-next-line @typescript-eslint/camelcase
-          issue_number: options.issue_number
-        })
-        .then(events => {
-          // issues is an array of all issue objects
-          core.debug(`${events}`)
-          for (const event of events.data) {
-            if (event.event === 'cross-referenced') {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const data: any = event
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const item: any = data.source
-              if (item.type === 'issue' && item.issue.pull_request === undefined) {
-                const issueNWO = item.issue.repository.full_name
-                const issueURL = item.issue.html_url
-                linkedissues.push(issueURL)
-                return linkedissues
-              }
+    let linkedissues: string[] = []
+    client.issues
+      .listEventsForTimeline({
+        owner: options.owner,
+        repo: options.repo,
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        issue_number: options.issue_number
+      })
+      .then(events => {
+        // issues is an array of all issue objects
+        core.debug(`${events}`)
+        for (const event of events.data) {
+          if (event.event === 'cross-referenced') {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const data: any = event
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const item: any = data.source
+            if (item.type === 'issue' && item.issue.pull_request === undefined) {
+              const issueNWO = item.issue.repository.full_name
+              const issueURL = item.issue.html_url
+              return linkedissues.push(issueURL)
             }
           }
-        })
-    )
+        }
+      })
     // for (const issue of issues) {
     //   core.debug(issue.id)
     // }
