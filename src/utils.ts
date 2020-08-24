@@ -198,3 +198,12 @@ export function parseYamlFromText(body: string): any {
 export function parseBodyFromText(body: string): string {
   return body.replace(/.*---\n[^)]*---\n.*/g, '')
 }
+
+/**
+ * get a unique list
+ * @param {string[]} the array to make unique
+ * @returns {string[]} the unique list
+ */
+export function unique(input: string[]): string[] {
+  return input.filter((item, i, ar) => ar.indexOf(item) === i)
+}
