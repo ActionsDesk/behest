@@ -9,7 +9,7 @@ import CommandContext from './context'
  * @param {args} list of arguments
  */
 export default async function issuescomment(
-  {client, owner, repo, issueNumber, issueBody, basepath}: CommandContext,
+  {owner, repo, issueNumber, issueBody, basepath}: CommandContext,
   ...args: string[]
 ): Promise<void> {
   const message: string = args.length > 1 ? args.join(' ') : args[0]
@@ -39,8 +39,15 @@ export default async function issuescomment(
         core.warning(`skipping issue comment for ${nwo.owner}/${nwo.name}/${refIssueNumber}`)
         continue
       }
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      await client.issues.createComment({owner: nwo.owner, repo: nwo.name, issue_number: refIssueNumber, body: message})
+      // we need an admin client vs normal client because the normal client only has rights to the current issue
+      const adminclient = utils.getAdminClient()
+      await adminclient.issues.createComment({
+        owner: nwo.owner,
+        repo: nwo.name,
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        issue_number: refIssueNumber,
+        body: message
+      })
     } catch (error) {
       core.warning(`Unable to create comment-> ${nwo.owner}/${nwo.name}/${refIssueNumber}`)
       core.error(error)

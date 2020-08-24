@@ -18553,7 +18553,7 @@ const utils = __importStar(__webpack_require__(611));
  * @param {CommandContext} context context for this command execution
  * @param {args} list of arguments
  */
-function issuescomment({ client, owner, repo, issueNumber, issueBody, basepath }, ...args) {
+function issuescomment({ owner, repo, issueNumber, issueBody, basepath }, ...args) {
     return __awaiter(this, void 0, void 0, function* () {
         const message = args.length > 1 ? args.join(' ') : args[0];
         // a little debuging info
@@ -18580,8 +18580,15 @@ function issuescomment({ client, owner, repo, issueNumber, issueBody, basepath }
                     core.warning(`skipping issue comment for ${nwo.owner}/${nwo.name}/${refIssueNumber}`);
                     continue;
                 }
-                // eslint-disable-next-line @typescript-eslint/camelcase
-                yield client.issues.createComment({ owner: nwo.owner, repo: nwo.name, issue_number: refIssueNumber, body: message });
+                // we need an admin client vs normal client because the normal client only has rights to the current issue
+                const adminclient = utils.getAdminClient();
+                yield adminclient.issues.createComment({
+                    owner: nwo.owner,
+                    repo: nwo.name,
+                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    issue_number: refIssueNumber,
+                    body: message
+                });
             }
             catch (error) {
                 core.warning(`Unable to create comment-> ${nwo.owner}/${nwo.name}/${refIssueNumber}`);
