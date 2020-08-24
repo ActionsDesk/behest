@@ -147,9 +147,9 @@ describe('utils.js tests', () => {
 
   // test unique
   test('unique', async () => {
-    let result: string[] = utils.unique(['a','a','b','c'])
+    let result: string[] = utils.unique(['a', 'a', 'b', 'c'])
     expect(result.length).toEqual(3)
-    expect(result).toEqual(['a','b','c'])
+    expect(result).toEqual(['a', 'b', 'c'])
 
     // little more complicated
     result = utils.unique([
@@ -164,12 +164,27 @@ describe('utils.js tests', () => {
     expect(result).toEqual([
       'https://github.com/github/foo/issues/1',
       'https://github.com/github/foo/issues/2',
-      'https://github.com/github/foo/issues/3',
+      'https://github.com/github/foo/issues/3'
     ])
 
     // deal with empty arrays
     result = utils.unique([])
     expect(result.length).toEqual(0)
     expect(result).toEqual([])
+  })
+
+  // test getIssueNumberFromURL
+  test('test getIssueNumberFromURL', async () => {
+    expect(utils.getIssueNumberFromURL('https://github.com/mona/test-repo-0/issues/12')).toEqual(12)
+    expect(utils.getIssueNumberFromURL('https://github.com/mona/test-repo-0/issues/9')).toEqual(9)
+    expect(utils.getIssueNumberFromURL('https://github.com/mona/test-repo-0/issues/10')).toEqual(10)
+    expect(utils.getIssueNumberFromURL('https://github.com/mona/test-repo-0/issues/901')).toEqual(901)
+    expect(utils.getIssueNumberFromURL('https://github.com/mona/test-repo-0/issues/1')).toEqual(1)
+    expect(utils.getIssueNumberFromURL('https://github.com/mona/test-repo-0/issues/')).toEqual(-1)
+    expect(utils.getIssueNumberFromURL('https://github.com/mona/test-repo-0/issue/1')).toEqual(-1)
+    expect(utils.getIssueNumberFromURL('https://github.com/mona/issue/1')).toEqual(-1)
+    expect(utils.getIssueNumberFromURL('https://github.com/mona/issues/1')).toEqual(-1)
+    expect(utils.getIssueNumberFromURL('https://github.com/issues/1')).toEqual(-1)
+    expect(utils.getIssueNumberFromURL('https://issues/1')).toEqual(-1)
   })
 })

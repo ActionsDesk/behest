@@ -14080,6 +14080,35 @@ function parseBodyFromText(body) {
     return body.replace(/.*---\n[^)]*---\n.*/g, '');
 }
 exports.parseBodyFromText = parseBodyFromText;
+/**
+ * get a unique list
+ * @param {string[]} the array to make unique
+ * @returns {string[]} the unique list
+ */
+function unique(input) {
+    return input.filter((item, i, ar) => ar.indexOf(item) === i);
+}
+exports.unique = unique;
+/**
+ * get issue number from url
+ * @param {string} the url to parse
+ * @return {number} a number for the issue
+ */
+function getIssueNumberFromURL(issueURL) {
+    let issueNumber = -1;
+    const issueMatch = issueURL.match(/https:\/\/.*\/(.*)\/(.*)\/issues\/(\d+)/i);
+    if (issueMatch instanceof Array) {
+        try {
+            issueNumber = new Number(issueMatch[issueMatch.length - 1]).valueOf();
+        }
+        catch (error) {
+            core.warning(`Unable to extract issue number from url -> ${issueURL}`);
+            core.error(error);
+        }
+    }
+    return issueNumber;
+}
+exports.getIssueNumberFromURL = getIssueNumberFromURL;
 
 
 /***/ }),
@@ -18543,30 +18572,20 @@ function issuescomment({ client, owner, repo, issueNumber, issueBody, basepath }
         const linkedIssues = yield utils.getLinkedIssues({ owner, repo, issue_number: issueNumber }, { nwo: filterNWO });
         core.debug(`LinkedIssues -> ${linkedIssues}`);
         // for each issue we need to create a comment
-        for (const url of linkedIssues.filter((item, i, ar) => ar.indexOf(item) === i)) {
+        for (const url of utils.unique(linkedIssues)) {
             const nwo = utils.getNWO(url);
-            let refIssue = -1;
-            const issueMatch = url.match(/https:\/\/.*\/issues\/(\d)/i);
-            if (issueMatch instanceof Array) {
-                try {
-                    refIssue = new Number(issueMatch[issueMatch.length - 1]).valueOf();
+            const refIssueNumber = utils.getIssueNumberFromURL(url);
+            try {
+                if (refIssueNumber === -1) {
+                    core.warning(`skipping issue comment for ${nwo.owner}/${nwo.name}/${refIssueNumber}`);
+                    continue;
                 }
-                catch (error) {
-                    core.warning(`Unable to extract issue number from url -> ${url}`);
-                    core.error(error);
-                }
-                try {
-                    if (refIssue === -1) {
-                        core.warning(`skipping issue comment for ${nwo.owner}/${nwo.name}/${refIssue}`);
-                        continue;
-                    }
-                    // eslint-disable-next-line @typescript-eslint/camelcase
-                    yield client.issues.createComment({ owner: nwo.owner, repo: nwo.name, issue_number: refIssue, body: message });
-                }
-                catch (error) {
-                    core.warning(`Unable to create comment-> ${nwo.owner}/${nwo.name}/${refIssue}`);
-                    core.error(error);
-                }
+                // eslint-disable-next-line @typescript-eslint/camelcase
+                yield client.issues.createComment({ owner: nwo.owner, repo: nwo.name, issue_number: refIssueNumber, body: message });
+            }
+            catch (error) {
+                core.warning(`Unable to create comment-> ${nwo.owner}/${nwo.name}/${refIssueNumber}`);
+                core.error(error);
             }
         }
     });

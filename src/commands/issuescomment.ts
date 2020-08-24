@@ -33,26 +33,17 @@ export default async function issuescomment(
   // for each issue we need to create a comment
   for (const url of utils.unique(linkedIssues)) {
     const nwo: utils.NWO = utils.getNWO(url)
-    let refIssue = -1
-    const issueMatch = url.match(/https:\/\/.*\/issues\/(\d)/i)
-    if (issueMatch instanceof Array) {
-      try {
-        refIssue = new Number(issueMatch[issueMatch.length - 1]).valueOf()
-      } catch (error) {
-        core.warning(`Unable to extract issue number from url -> ${url}`)
-        core.error(error)
+    const refIssueNumber = utils.getIssueNumberFromURL(url)
+    try {
+      if (refIssueNumber === -1) {
+        core.warning(`skipping issue comment for ${nwo.owner}/${nwo.name}/${refIssueNumber}`)
+        continue
       }
-      try {
-        if (refIssue === -1) {
-          core.warning(`skipping issue comment for ${nwo.owner}/${nwo.name}/${refIssue}`)
-          continue
-        }
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        await client.issues.createComment({owner: nwo.owner, repo: nwo.name, issue_number: refIssue, body: message})
-      } catch (error) {
-        core.warning(`Unable to create comment-> ${nwo.owner}/${nwo.name}/${refIssue}`)
-        core.error(error)
-      }
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      await client.issues.createComment({owner: nwo.owner, repo: nwo.name, issue_number: refIssueNumber, body: message})
+    } catch (error) {
+      core.warning(`Unable to create comment-> ${nwo.owner}/${nwo.name}/${refIssueNumber}`)
+      core.error(error)
     }
   }
 }

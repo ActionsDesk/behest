@@ -207,3 +207,22 @@ export function parseBodyFromText(body: string): string {
 export function unique(input: string[]): string[] {
   return input.filter((item, i, ar) => ar.indexOf(item) === i)
 }
+
+/**
+ * get issue number from url
+ * @param {string} the url to parse
+ * @return {number} a number for the issue
+ */
+export function getIssueNumberFromURL(issueURL: string): number {
+  let issueNumber = -1
+  const issueMatch = issueURL.match(/https:\/\/.*\/(.*)\/(.*)\/issues\/(\d+)/i)
+  if (issueMatch instanceof Array) {
+    try {
+      issueNumber = new Number(issueMatch[issueMatch.length - 1]).valueOf()
+    } catch (error) {
+      core.warning(`Unable to extract issue number from url -> ${issueURL}`)
+      core.error(error)
+    }
+  }
+  return issueNumber
+}
