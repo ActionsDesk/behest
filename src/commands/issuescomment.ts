@@ -31,7 +31,7 @@ export default async function issuescomment(
   core.debug(`LinkedIssues -> ${linkedIssues}`)
 
   // for each issue we need to create a comment
-  for (const url of linkedIssues) {
+  for (const url of linkedIssues.filter((item, i, ar) => ar.indexOf(item) === i)) {
     const nwo: utils.NWO = utils.getNWO(url)
     try {
       const issueMatch = url.match(/https:\/\/.*\/issues\/(\d)/i)
