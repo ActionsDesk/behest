@@ -5,6 +5,7 @@ import * as fs from 'fs'
 import * as utils from '../src/utils'
 
 const GetIssueResponse = require('./fixtures/GetIssueResponse.json')
+const GetIssueTimelineResponse = require('./fixtures/GetIssueTimelineResponse.json')
 const client = new GitHub('dummy-token')
 
 function getRandomNumber(): Number {
@@ -129,5 +130,18 @@ describe('utils.js tests', () => {
     const expects: string =
       '\n' + '# Project #3 Message with $SERVICE\n' + '\n' + '👋🏼 Greetings,  🎉\n' + '\n' + '### Why me?\n'
     expect(utils.parseBodyFromText(body)).toEqual(expects)
+  })
+
+  // test getLinkedIssues
+  // TODO: fix mocking ::warning::TypeError: client.issues.listEventsForTimeline is not a function
+  //        it's calling a generator, and this needs to figure out how to do that
+  test('utils getLinkedIssues', async () => {
+    const mockGetIssueTimeline = jest.spyOn(client.issues, 'listEventsForTimeline')
+    mockGetIssueTimeline.mockImplementation(() => GetIssueTimelineResponse)
+
+    const url = await utils.getLinkedIssues({owner: 'a', repo: 'b', issue_number: 5}, {nwo: []})
+
+    expect(mockGetIssueTimeline.mock.calls.length).toEqual(0)
+    expect(url.length).toEqual(0)
   })
 })

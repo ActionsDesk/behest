@@ -13,7 +13,9 @@ describe('main debug', () => {
     process.env.INPUT_ADMIN_TOKEN = process.env.GITHUB_TOKEN
     process.env.GITHUB_REPOSITORY = process.env.GITHUB_REPOSITORY === undefined ? 'a/b' : process.env.GITHUB_REPOSITORY
     const username = process.env.GITHUB_USERNAME === undefined ? 'mona' : process.env.GITHUB_USERNAME
-    const issueNumber = new Number(process.env.GITHUB_ISSUE_NUMBER === undefined ? new Number(1) : process.env.GITHUB_ISSUE_NUMBER)
+    const issueNumber = new Number(
+      process.env.GITHUB_ISSUE_NUMBER === undefined ? new Number(1) : process.env.GITHUB_ISSUE_NUMBER
+    )
 
     github.context.payload = {comment: {body: '', user: {login: username}}, issue: {number: issueNumber.valueOf()}}
 
@@ -32,7 +34,9 @@ describe('main debug', () => {
     const default_args = 'foo message\nhttp://url1\nhttp://url2\n/'
     let args = process.env.TEST_COMMAND === undefined ? default_args : process.env.TEST_COMMAND
     const username = process.env.GITHUB_USERNAME === undefined ? 'mona' : process.env.GITHUB_USERNAME
-    const issueNumber = new Number(process.env.GITHUB_ISSUE_NUMBER === undefined ? new Number(1) : process.env.GITHUB_ISSUE_NUMBER)
+    const issueNumber = new Number(
+      process.env.GITHUB_ISSUE_NUMBER === undefined ? new Number(1) : process.env.GITHUB_ISSUE_NUMBER
+    )
 
     github.context.payload = {
       comment: {body: `/issuescreate ${args}/endissuescreate`, user: {login: username}},
@@ -54,7 +58,9 @@ describe('main debug', () => {
     const default_args = 'foo message\nhttp://url1\nhttp://url2\n'
     let args = process.env.TEST_COMMAND === undefined ? default_args : process.env.TEST_COMMAND
     const username = process.env.GITHUB_USERNAME === undefined ? 'mona' : process.env.GITHUB_USERNAME
-    const issueNumber = new Number(process.env.GITHUB_ISSUE_NUMBER === undefined ? new Number(1) : process.env.GITHUB_ISSUE_NUMBER)
+    const issueNumber = new Number(
+      process.env.GITHUB_ISSUE_NUMBER === undefined ? new Number(1) : process.env.GITHUB_ISSUE_NUMBER
+    )
 
     github.context.payload = {
       comment: {

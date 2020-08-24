@@ -60,7 +60,10 @@ export async function getIssueHtmlUrl(options: {owner: string; repo: string; iss
  * @param {owner, repo, issue_number}  the issue options
  * @returns {string[]}
  */
-export async function getLinkedIssues(options: {owner: string; repo: string; issue_number: number}): Promise<string[]> {
+export async function getLinkedIssues(
+  options: {owner: string; repo: string; issue_number: number},
+  filter: {nwo: string[]}
+): Promise<string[]> {
   try {
     const client: github.GitHub = getAdminClient()
 
@@ -83,8 +86,10 @@ export async function getLinkedIssues(options: {owner: string; repo: string; iss
             const item: any = data.source
             if (item.type === 'issue' && item.issue.pull_request === undefined) {
               const issueNWO = item.issue.repository.full_name
-              const issueURL = item.issue.html_url
-              linkedIssues.push(issueURL)
+              if (filter.nwo.length === 0 || filter.nwo.includes(issueNWO)) {
+                const issueURL = item.issue.html_url
+                linkedIssues.push(issueURL)
+              }
             }
           }
         }
