@@ -5948,7 +5948,7 @@ function main() {
                     owner,
                     repo,
                     issueNumber: number,
-                    issueBody: comment.body.split(/\n/),
+                    issueBody: comment.body.split(/[\n\r]/g),
                     basepath: '.'
                 }, ...args);
             }
@@ -18543,19 +18543,30 @@ function issuescomment({ client, owner, repo, issueNumber, issueBody, basepath }
         const linkedIssues = yield utils.getLinkedIssues({ owner, repo, issue_number: issueNumber }, { nwo: filterNWO });
         core.debug(`LinkedIssues -> ${linkedIssues}`);
         // for each issue we need to create a comment
-        for (const url of linkedIssues) {
+        for (const url of linkedIssues.filter((item, i, ar) => ar.indexOf(item) === i)) {
             const nwo = utils.getNWO(url);
-            try {
-                const issueMatch = url.match(/https:\/\/.*\/issues\/(\d)/i);
-                if (issueMatch instanceof Array) {
-                    const refIssue = new Number(issueMatch[issueMatch.length - 1]).valueOf();
+            let refIssue = -1;
+            const issueMatch = url.match(/https:\/\/.*\/issues\/(\d)/i);
+            if (issueMatch instanceof Array) {
+                try {
+                    refIssue = new Number(issueMatch[issueMatch.length - 1]).valueOf();
+                }
+                catch (error) {
+                    core.warning(`Unable to extract issue number from url -> ${url}`);
+                    core.error(error);
+                }
+                try {
+                    if (refIssue === -1) {
+                        core.warning(`skipping issue comment for ${nwo.owner}/${nwo.name}/${refIssue}`);
+                        continue;
+                    }
                     // eslint-disable-next-line @typescript-eslint/camelcase
                     yield client.issues.createComment({ owner: nwo.owner, repo: nwo.name, issue_number: refIssue, body: message });
                 }
-            }
-            catch (error) {
-                core.warning(`Unable to extract issue number from url -> ${url}`);
-                core.error(error);
+                catch (error) {
+                    core.warning(`Unable to create comment-> ${nwo.owner}/${nwo.name}/${refIssue}`);
+                    core.error(error);
+                }
             }
         }
     });
