@@ -68,14 +68,14 @@ export async function getLinkedIssues(
     const client: github.GitHub = getAdminClient()
 
     const linkedIssues: string[] = []
-    await client.issues
-      .listEventsForTimeline({
-        owner: options.owner,
-        repo: options.repo,
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        issue_number: options.issue_number
-      })
-      .then(events => {
+        const events = await client.issues
+          .listEventsForTimeline({
+            owner: options.owner,
+            repo: options.repo,
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            issue_number: options.issue_number
+          })
+
         // issues is an array of all issue objects
         core.debug(`${events}`)
         for (const event of events.data) {
@@ -90,10 +90,9 @@ export async function getLinkedIssues(
                 const issueURL = item.issue.html_url
                 linkedIssues.push(issueURL)
               }
-            }
           }
         }
-      })
+      }
     return linkedIssues
   } catch (error) {
     core.debug(`unable to listEvents from: ${options.owner}/${options.repo}/issues/${options.issue_number}`)
