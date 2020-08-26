@@ -31,7 +31,7 @@ export default async function issuescomment(
   core.debug(`LinkedIssues -> ${linkedIssues}`)
 
   // for each issue we need to create a comment
-  for (const url of utils.unique(linkedIssues)) {
+  for (const url of new Set(linkedIssues)) {
     const nwo: utils.NWO = utils.getNWO(url)
     const refIssueNumber = utils.getIssueNumberFromURL(url)
     try {
