@@ -13941,32 +13941,30 @@ function getLinkedIssues(options, filter) {
         try {
             const client = getAdminClient();
             const linkedIssues = [];
-            yield client.issues
-                .listEventsForTimeline({
+            // Get the linked issues from the issue timeline
+            const events = yield client.issues.listEventsForTimeline({
                 owner: options.owner,
                 repo: options.repo,
                 // eslint-disable-next-line @typescript-eslint/camelcase
                 issue_number: options.issue_number
-            })
-                .then(events => {
-                // issues is an array of all issue objects
-                core.debug(`${events}`);
-                for (const event of events.data) {
-                    if (event.event === 'cross-referenced') {
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        const data = event;
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        const item = data.source;
-                        if (item.type === 'issue' && item.issue.pull_request === undefined) {
-                            const issueNWO = item.issue.repository.full_name;
-                            if (filter.nwo.length === 0 || filter.nwo.includes(issueNWO)) {
-                                const issueURL = item.issue.html_url;
-                                linkedIssues.push(issueURL);
-                            }
+            });
+            // issues is an array of all issue objects
+            core.debug(`${events}`);
+            for (const event of events.data) {
+                if (event.event === 'cross-referenced') {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const data = event;
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const item = data.source;
+                    if (item.type === 'issue' && item.issue.pull_request === undefined) {
+                        const issueNWO = item.issue.repository.full_name;
+                        if (filter.nwo.length === 0 || filter.nwo.includes(issueNWO)) {
+                            const issueURL = item.issue.html_url;
+                            linkedIssues.push(issueURL);
                         }
                     }
                 }
-            });
+            }
             return linkedIssues;
         }
         catch (error) {

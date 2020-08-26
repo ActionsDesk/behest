@@ -68,31 +68,32 @@ export async function getLinkedIssues(
     const client: github.GitHub = getAdminClient()
 
     const linkedIssues: string[] = []
-        const events = await client.issues
-          .listEventsForTimeline({
-            owner: options.owner,
-            repo: options.repo,
-            // eslint-disable-next-line @typescript-eslint/camelcase
-            issue_number: options.issue_number
-          })
 
-        // issues is an array of all issue objects
-        core.debug(`${events}`)
-        for (const event of events.data) {
-          if (event.event === 'cross-referenced') {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const data: any = event
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const item: any = data.source
-            if (item.type === 'issue' && item.issue.pull_request === undefined) {
-              const issueNWO = item.issue.repository.full_name
-              if (filter.nwo.length === 0 || filter.nwo.includes(issueNWO)) {
-                const issueURL = item.issue.html_url
-                linkedIssues.push(issueURL)
-              }
+    // Get the linked issues from the issue timeline
+    const events = await client.issues.listEventsForTimeline({
+      owner: options.owner,
+      repo: options.repo,
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      issue_number: options.issue_number
+    })
+
+    // issues is an array of all issue objects
+    core.debug(`${events}`)
+    for (const event of events.data) {
+      if (event.event === 'cross-referenced') {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const data: any = event
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const item: any = data.source
+        if (item.type === 'issue' && item.issue.pull_request === undefined) {
+          const issueNWO = item.issue.repository.full_name
+          if (filter.nwo.length === 0 || filter.nwo.includes(issueNWO)) {
+            const issueURL = item.issue.html_url
+            linkedIssues.push(issueURL)
           }
         }
       }
+    }
     return linkedIssues
   } catch (error) {
     core.debug(`unable to listEvents from: ${options.owner}/${options.repo}/issues/${options.issue_number}`)
