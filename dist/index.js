@@ -18572,7 +18572,7 @@ function issuescomment({ owner, repo, issueNumber, issueBody, basepath }, ...arg
         const linkedIssues = yield utils.getLinkedIssues({ owner, repo, issue_number: issueNumber }, { nwo: filterNWO });
         core.debug(`LinkedIssues -> ${linkedIssues}`);
         // for each issue we need to create a comment
-        for (const url of utils.unique(linkedIssues)) {
+        for (const url of new Set(linkedIssues)) {
             const nwo = utils.getNWO(url);
             const refIssueNumber = utils.getIssueNumberFromURL(url);
             try {

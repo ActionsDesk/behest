@@ -145,34 +145,6 @@ describe('utils.js tests', () => {
     expect(url.length).toEqual(0)
   })
 
-  // test unique
-  test('unique', async () => {
-    let result: string[] = utils.unique(['a', 'a', 'b', 'c'])
-    expect(result.length).toEqual(3)
-    expect(result).toEqual(['a', 'b', 'c'])
-
-    // little more complicated
-    result = utils.unique([
-      'https://github.com/github/foo/issues/1',
-      'https://github.com/github/foo/issues/1',
-      'https://github.com/github/foo/issues/2',
-      'https://github.com/github/foo/issues/2',
-      'https://github.com/github/foo/issues/3',
-      'https://github.com/github/foo/issues/3'
-    ])
-    expect(result.length).toEqual(3)
-    expect(result).toEqual([
-      'https://github.com/github/foo/issues/1',
-      'https://github.com/github/foo/issues/2',
-      'https://github.com/github/foo/issues/3'
-    ])
-
-    // deal with empty arrays
-    result = utils.unique([])
-    expect(result.length).toEqual(0)
-    expect(result).toEqual([])
-  })
-
   // test getIssueNumberFromURL
   test('test getIssueNumberFromURL', async () => {
     expect(utils.getIssueNumberFromURL('https://github.com/mona/test-repo-0/issues/12')).toEqual(12)
