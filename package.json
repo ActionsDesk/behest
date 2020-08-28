@@ -12,6 +12,7 @@
     "lint-fix": "eslint --fix src/**/*.ts",
     "pack": "ncc build",
     "test": "jest",
+    "debug": "node --inspect-brk $(which jest) --detectOpenHandles --skipFilter --runTestsByPath __tests__/main.debug.test.ts -t",
     "all": "npm run build && npm run format && npm run lint && npm run pack && npm test"
   },
   "repository": {

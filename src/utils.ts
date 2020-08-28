@@ -2,7 +2,7 @@ import * as fs from 'fs'
 import YAML from 'yaml'
 import * as github from '@actions/github'
 import * as core from '@actions/core'
-import {toJSON} from 'yaml/util'
+import {SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION} from 'constants'
 
 export const {stat} = fs.promises
 
@@ -19,7 +19,7 @@ export interface NWO {
 export function getClient(): github.GitHub {
   const token: string = process.env.INPUT_TOKEN || ''
   core.debug(`trying with regular token -> ${token.length}`)
-  let client: github.GitHub = new github.GitHub(token)
+  const client: github.GitHub = new github.GitHub(token)
   core.debug('returning client')
   return client
 }
@@ -32,7 +32,7 @@ export function getClient(): github.GitHub {
 export function getAdminClient(): github.GitHub {
   const token: string = process.env.INPUT_ADMIN_TOKEN || ''
   core.debug(`trying with admin token -> ${token.length}`)
-  let client: github.GitHub = new github.GitHub(token)
+  const client: github.GitHub = new github.GitHub(token)
   core.debug('returning client')
   return client
 }
@@ -52,6 +52,53 @@ export async function getIssueHtmlUrl(options: {owner: string; repo: string; iss
     core.debug('unable to get url from issue')
     core.warning(error)
     return `https://github.com/${options.owner}/${options.repo}/issues/${options.issue_number}`
+  }
+}
+
+/**
+ * Get list of linked issues
+ * @param {owner, repo, issue_number}  the issue options
+ * @returns {string[]}
+ */
+export async function getLinkedIssues(
+  options: {owner: string; repo: string; issue_number: number},
+  filter: {nwo: string[]}
+): Promise<string[]> {
+  try {
+    const client: github.GitHub = getAdminClient()
+
+    const linkedIssues: string[] = []
+
+    // Get the linked issues from the issue timeline
+    const events = await client.issues.listEventsForTimeline({
+      owner: options.owner,
+      repo: options.repo,
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      issue_number: options.issue_number
+    })
+
+    // issues is an array of all issue objects
+    core.debug(`${events}`)
+    for (const event of events.data) {
+      if (event.event === 'cross-referenced') {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const data: any = event
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const item: any = data.source
+        if (item.type === 'issue' && item.issue.pull_request === undefined) {
+          const issueNWO = item.issue.repository.full_name
+          if (filter.nwo.length === 0 || filter.nwo.includes(issueNWO)) {
+            const issueURL = item.issue.html_url
+            linkedIssues.push(issueURL)
+          }
+        }
+      }
+    }
+    return linkedIssues
+  } catch (error) {
+    core.debug(`unable to listEvents from: ${options.owner}/${options.repo}/issues/${options.issue_number}`)
+    core.warning(error)
+    return []
   }
 }
 
@@ -125,6 +172,7 @@ export function parseExtraArgs(body: string[], command: string): string[] {
  * @param {string} the body to parse
  * @retruns {YAML} returns the first document found
  */
+// eslint-disable-next-line @typescript-eslint/promise-function-async, @typescript-eslint/no-explicit-any
 export function parseYamlFromText(body: string): any {
   let result = JSON.parse('{}')
   try {
@@ -139,7 +187,6 @@ export function parseYamlFromText(body: string): any {
     core.warning(error)
     return result
   }
-  return result
 }
 
 /**
@@ -150,4 +197,32 @@ export function parseYamlFromText(body: string): any {
  */
 export function parseBodyFromText(body: string): string {
   return body.replace(/.*---\n[^)]*---\n.*/g, '')
+}
+
+/**
+ * get a unique list
+ * @param {string[]} the array to make unique
+ * @returns {string[]} the unique list
+ */
+export function unique(input: string[]): string[] {
+  return input.filter((item, i, ar) => ar.indexOf(item) === i)
+}
+
+/**
+ * get issue number from url
+ * @param {string} the url to parse
+ * @return {number} a number for the issue
+ */
+export function getIssueNumberFromURL(issueURL: string): number {
+  let issueNumber = -1
+  const issueMatch = issueURL.match(/https:\/\/.*\/(.*)\/(.*)\/issues\/(\d+)/i)
+  if (issueMatch instanceof Array) {
+    try {
+      issueNumber = new Number(issueMatch[issueMatch.length - 1]).valueOf()
+    } catch (error) {
+      core.warning(`Unable to extract issue number from url -> ${issueURL}`)
+      core.error(error)
+    }
+  }
+  return issueNumber
 }

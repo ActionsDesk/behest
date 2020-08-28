@@ -4945,11 +4945,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const greet_1 = __importDefault(__webpack_require__(166));
 const invite_1 = __importDefault(__webpack_require__(935));
 const issuescreate_1 = __importDefault(__webpack_require__(269));
+const issuescomment_1 = __importDefault(__webpack_require__(998));
 const kick_1 = __importDefault(__webpack_require__(155));
 const registry = {
     greet: greet_1.default,
     invite: invite_1.default,
     issuescreate: issuescreate_1.default,
+    issuescomment: issuescomment_1.default,
     kick: kick_1.default
 };
 exports.default = registry;
@@ -5946,7 +5948,7 @@ function main() {
                     owner,
                     repo,
                     issueNumber: number,
-                    issueBody: comment.body.split(/\n/),
+                    issueBody: comment.body.split(/[\n\r]/g),
                     basepath: '.'
                 }, ...args);
             }
@@ -5974,7 +5976,7 @@ module.exports = require("https");
 /***/ 215:
 /***/ (function(module) {
 
-module.exports = {"_args":[["@octokit/rest@16.37.0","/home/codespace/workspace/behest"]],"_from":"@octokit/rest@16.37.0","_id":"@octokit/rest@16.37.0","_inBundle":false,"_integrity":"sha512-qLPK9FOCK4iVpn6ghknNuv/gDDxXQG6+JBQvoCwWjQESyis9uemakjzN36nvvp8SCny7JuzHI2RV8ChbV5mYdQ==","_location":"/@octokit/rest","_phantomChildren":{},"_requested":{"type":"version","registry":true,"raw":"@octokit/rest@16.37.0","name":"@octokit/rest","escapedName":"@octokit%2frest","scope":"@octokit","rawSpec":"16.37.0","saveSpec":null,"fetchSpec":"16.37.0"},"_requiredBy":["/@actions/github"],"_resolved":"https://registry.npmjs.org/@octokit/rest/-/rest-16.37.0.tgz","_spec":"16.37.0","_where":"/home/codespace/workspace/behest","author":{"name":"Gregor Martynus","url":"https://github.com/gr2m"},"bugs":{"url":"https://github.com/octokit/rest.js/issues"},"bundlesize":[{"path":"./dist/octokit-rest.min.js.gz","maxSize":"33 kB"}],"contributors":[{"name":"Mike de Boer","email":"info@mikedeboer.nl"},{"name":"Fabian Jakobs","email":"fabian@c9.io"},{"name":"Joe Gallo","email":"joe@brassafrax.com"},{"name":"Gregor Martynus","url":"https://github.com/gr2m"}],"dependencies":{"@octokit/request":"^5.2.0","@octokit/request-error":"^1.0.2","atob-lite":"^2.0.0","before-after-hook":"^2.0.0","btoa-lite":"^1.0.0","deprecation":"^2.0.0","lodash.get":"^4.4.2","lodash.set":"^4.3.2","lodash.uniq":"^4.5.0","octokit-pagination-methods":"^1.1.0","once":"^1.4.0","universal-user-agent":"^4.0.0"},"description":"GitHub REST API client for Node.js","devDependencies":{"@gimenete/type-writer":"^0.1.3","@octokit/fixtures-server":"^5.0.6","@octokit/graphql":"^4.2.0","@types/node":"^13.1.0","bundlesize":"^0.18.0","chai":"^4.1.2","compression-webpack-plugin":"^3.0.0","cypress":"^3.0.0","glob":"^7.1.2","http-proxy-agent":"^3.0.0","lodash.camelcase":"^4.3.0","lodash.merge":"^4.6.1","lodash.upperfirst":"^4.3.1","mkdirp":"^0.5.1","mocha":"^6.0.0","mustache":"^4.0.0","nock":"^11.3.3","npm-run-all":"^4.1.2","nyc":"^15.0.0","prettier":"^1.14.2","proxy":"^1.0.0","semantic-release":"^16.0.0","sinon":"^8.0.0","sinon-chai":"^3.0.0","sort-keys":"^4.0.0","string-to-arraybuffer":"^1.0.0","string-to-jsdoc-comment":"^1.0.0","typescript":"^3.3.1","webpack":"^4.0.0","webpack-bundle-analyzer":"^3.0.0","webpack-cli":"^3.0.0"},"files":["index.js","index.d.ts","lib","plugins"],"homepage":"https://github.com/octokit/rest.js#readme","keywords":["octokit","github","rest","api-client"],"license":"MIT","name":"@octokit/rest","nyc":{"ignore":["test"]},"publishConfig":{"access":"public"},"release":{"publish":["@semantic-release/npm",{"path":"@semantic-release/github","assets":["dist/*","!dist/*.map.gz"]}]},"repository":{"type":"git","url":"git+https://github.com/octokit/rest.js.git"},"scripts":{"build":"npm-run-all build:*","build:browser":"npm-run-all build:browser:*","build:browser:development":"webpack --mode development --entry . --output-library=Octokit --output=./dist/octokit-rest.js --profile --json > dist/bundle-stats.json","build:browser:production":"webpack --mode production --entry . --plugin=compression-webpack-plugin --output-library=Octokit --output-path=./dist --output-filename=octokit-rest.min.js --devtool source-map","build:ts":"npm run -s update-endpoints:typescript","coverage":"nyc report --reporter=html && open coverage/index.html","generate-bundle-report":"webpack-bundle-analyzer dist/bundle-stats.json --mode=static --no-open --report dist/bundle-report.html","lint":"prettier --check '{lib,plugins,scripts,test}/**/*.{js,json,ts}' 'docs/*.{js,json}' 'docs/src/**/*' index.js README.md package.json","lint:fix":"prettier --write '{lib,plugins,scripts,test}/**/*.{js,json,ts}' 'docs/*.{js,json}' 'docs/src/**/*' index.js README.md package.json","postvalidate:ts":"tsc --noEmit --target es6 test/typescript-validate.ts","prebuild:browser":"mkdirp dist/","pretest":"npm run -s lint","prevalidate:ts":"npm run -s build:ts","start-fixtures-server":"octokit-fixtures-server","test":"nyc mocha test/mocha-node-setup.js \"test/*/**/*-test.js\"","test:browser":"cypress run --browser chrome","update-endpoints":"npm-run-all update-endpoints:*","update-endpoints:code":"node scripts/update-endpoints/code","update-endpoints:fetch-json":"node scripts/update-endpoints/fetch-json","update-endpoints:typescript":"node scripts/update-endpoints/typescript","validate:ts":"tsc --target es6 --noImplicitAny index.d.ts"},"types":"index.d.ts","version":"16.37.0"};
+module.exports = {"_args":[["@octokit/rest@16.37.0","/Users/wenlock/Documents/GitHub/behest"]],"_from":"@octokit/rest@16.37.0","_id":"@octokit/rest@16.37.0","_inBundle":false,"_integrity":"sha512-qLPK9FOCK4iVpn6ghknNuv/gDDxXQG6+JBQvoCwWjQESyis9uemakjzN36nvvp8SCny7JuzHI2RV8ChbV5mYdQ==","_location":"/@octokit/rest","_phantomChildren":{},"_requested":{"type":"version","registry":true,"raw":"@octokit/rest@16.37.0","name":"@octokit/rest","escapedName":"@octokit%2frest","scope":"@octokit","rawSpec":"16.37.0","saveSpec":null,"fetchSpec":"16.37.0"},"_requiredBy":["/@actions/github"],"_resolved":"https://registry.npmjs.org/@octokit/rest/-/rest-16.37.0.tgz","_spec":"16.37.0","_where":"/Users/wenlock/Documents/GitHub/behest","author":{"name":"Gregor Martynus","url":"https://github.com/gr2m"},"bugs":{"url":"https://github.com/octokit/rest.js/issues"},"bundlesize":[{"path":"./dist/octokit-rest.min.js.gz","maxSize":"33 kB"}],"contributors":[{"name":"Mike de Boer","email":"info@mikedeboer.nl"},{"name":"Fabian Jakobs","email":"fabian@c9.io"},{"name":"Joe Gallo","email":"joe@brassafrax.com"},{"name":"Gregor Martynus","url":"https://github.com/gr2m"}],"dependencies":{"@octokit/request":"^5.2.0","@octokit/request-error":"^1.0.2","atob-lite":"^2.0.0","before-after-hook":"^2.0.0","btoa-lite":"^1.0.0","deprecation":"^2.0.0","lodash.get":"^4.4.2","lodash.set":"^4.3.2","lodash.uniq":"^4.5.0","octokit-pagination-methods":"^1.1.0","once":"^1.4.0","universal-user-agent":"^4.0.0"},"description":"GitHub REST API client for Node.js","devDependencies":{"@gimenete/type-writer":"^0.1.3","@octokit/fixtures-server":"^5.0.6","@octokit/graphql":"^4.2.0","@types/node":"^13.1.0","bundlesize":"^0.18.0","chai":"^4.1.2","compression-webpack-plugin":"^3.0.0","cypress":"^3.0.0","glob":"^7.1.2","http-proxy-agent":"^3.0.0","lodash.camelcase":"^4.3.0","lodash.merge":"^4.6.1","lodash.upperfirst":"^4.3.1","mkdirp":"^0.5.1","mocha":"^6.0.0","mustache":"^4.0.0","nock":"^11.3.3","npm-run-all":"^4.1.2","nyc":"^15.0.0","prettier":"^1.14.2","proxy":"^1.0.0","semantic-release":"^16.0.0","sinon":"^8.0.0","sinon-chai":"^3.0.0","sort-keys":"^4.0.0","string-to-arraybuffer":"^1.0.0","string-to-jsdoc-comment":"^1.0.0","typescript":"^3.3.1","webpack":"^4.0.0","webpack-bundle-analyzer":"^3.0.0","webpack-cli":"^3.0.0"},"files":["index.js","index.d.ts","lib","plugins"],"homepage":"https://github.com/octokit/rest.js#readme","keywords":["octokit","github","rest","api-client"],"license":"MIT","name":"@octokit/rest","nyc":{"ignore":["test"]},"publishConfig":{"access":"public"},"release":{"publish":["@semantic-release/npm",{"path":"@semantic-release/github","assets":["dist/*","!dist/*.map.gz"]}]},"repository":{"type":"git","url":"git+https://github.com/octokit/rest.js.git"},"scripts":{"build":"npm-run-all build:*","build:browser":"npm-run-all build:browser:*","build:browser:development":"webpack --mode development --entry . --output-library=Octokit --output=./dist/octokit-rest.js --profile --json > dist/bundle-stats.json","build:browser:production":"webpack --mode production --entry . --plugin=compression-webpack-plugin --output-library=Octokit --output-path=./dist --output-filename=octokit-rest.min.js --devtool source-map","build:ts":"npm run -s update-endpoints:typescript","coverage":"nyc report --reporter=html && open coverage/index.html","generate-bundle-report":"webpack-bundle-analyzer dist/bundle-stats.json --mode=static --no-open --report dist/bundle-report.html","lint":"prettier --check '{lib,plugins,scripts,test}/**/*.{js,json,ts}' 'docs/*.{js,json}' 'docs/src/**/*' index.js README.md package.json","lint:fix":"prettier --write '{lib,plugins,scripts,test}/**/*.{js,json,ts}' 'docs/*.{js,json}' 'docs/src/**/*' index.js README.md package.json","postvalidate:ts":"tsc --noEmit --target es6 test/typescript-validate.ts","prebuild:browser":"mkdirp dist/","pretest":"npm run -s lint","prevalidate:ts":"npm run -s build:ts","start-fixtures-server":"octokit-fixtures-server","test":"nyc mocha test/mocha-node-setup.js \"test/*/**/*-test.js\"","test:browser":"cypress run --browser chrome","update-endpoints":"npm-run-all update-endpoints:*","update-endpoints:code":"node scripts/update-endpoints/code","update-endpoints:fetch-json":"node scripts/update-endpoints/fetch-json","update-endpoints:typescript":"node scripts/update-endpoints/typescript","validate:ts":"tsc --target es6 --noImplicitAny index.d.ts"},"types":"index.d.ts","version":"16.37.0"};
 
 /***/ }),
 
@@ -13890,7 +13892,7 @@ exports.stat = fs.promises.stat;
 function getClient() {
     const token = process.env.INPUT_TOKEN || '';
     core.debug(`trying with regular token -> ${token.length}`);
-    let client = new github.GitHub(token);
+    const client = new github.GitHub(token);
     core.debug('returning client');
     return client;
 }
@@ -13903,7 +13905,7 @@ exports.getClient = getClient;
 function getAdminClient() {
     const token = process.env.INPUT_ADMIN_TOKEN || '';
     core.debug(`trying with admin token -> ${token.length}`);
-    let client = new github.GitHub(token);
+    const client = new github.GitHub(token);
     core.debug('returning client');
     return client;
 }
@@ -13929,6 +13931,50 @@ function getIssueHtmlUrl(options) {
     });
 }
 exports.getIssueHtmlUrl = getIssueHtmlUrl;
+/**
+ * Get list of linked issues
+ * @param {owner, repo, issue_number}  the issue options
+ * @returns {string[]}
+ */
+function getLinkedIssues(options, filter) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const client = getAdminClient();
+            const linkedIssues = [];
+            // Get the linked issues from the issue timeline
+            const events = yield client.issues.listEventsForTimeline({
+                owner: options.owner,
+                repo: options.repo,
+                // eslint-disable-next-line @typescript-eslint/camelcase
+                issue_number: options.issue_number
+            });
+            // issues is an array of all issue objects
+            core.debug(`${events}`);
+            for (const event of events.data) {
+                if (event.event === 'cross-referenced') {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const data = event;
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const item = data.source;
+                    if (item.type === 'issue' && item.issue.pull_request === undefined) {
+                        const issueNWO = item.issue.repository.full_name;
+                        if (filter.nwo.length === 0 || filter.nwo.includes(issueNWO)) {
+                            const issueURL = item.issue.html_url;
+                            linkedIssues.push(issueURL);
+                        }
+                    }
+                }
+            }
+            return linkedIssues;
+        }
+        catch (error) {
+            core.debug(`unable to listEvents from: ${options.owner}/${options.repo}/issues/${options.issue_number}`);
+            core.warning(error);
+            return [];
+        }
+    });
+}
+exports.getLinkedIssues = getLinkedIssues;
 /**
  * get a name with owner
  *
@@ -14004,6 +14050,7 @@ exports.parseExtraArgs = parseExtraArgs;
  * @param {string} the body to parse
  * @retruns {YAML} returns the first document found
  */
+// eslint-disable-next-line @typescript-eslint/promise-function-async, @typescript-eslint/no-explicit-any
 function parseYamlFromText(body) {
     let result = JSON.parse('{}');
     try {
@@ -14019,7 +14066,6 @@ function parseYamlFromText(body) {
         core.warning(error);
         return result;
     }
-    return result;
 }
 exports.parseYamlFromText = parseYamlFromText;
 /**
@@ -14032,6 +14078,35 @@ function parseBodyFromText(body) {
     return body.replace(/.*---\n[^)]*---\n.*/g, '');
 }
 exports.parseBodyFromText = parseBodyFromText;
+/**
+ * get a unique list
+ * @param {string[]} the array to make unique
+ * @returns {string[]} the unique list
+ */
+function unique(input) {
+    return input.filter((item, i, ar) => ar.indexOf(item) === i);
+}
+exports.unique = unique;
+/**
+ * get issue number from url
+ * @param {string} the url to parse
+ * @return {number} a number for the issue
+ */
+function getIssueNumberFromURL(issueURL) {
+    let issueNumber = -1;
+    const issueMatch = issueURL.match(/https:\/\/.*\/(.*)\/(.*)\/issues\/(\d+)/i);
+    if (issueMatch instanceof Array) {
+        try {
+            issueNumber = new Number(issueMatch[issueMatch.length - 1]).valueOf();
+        }
+        catch (error) {
+            core.warning(`Unable to extract issue number from url -> ${issueURL}`);
+            core.error(error);
+        }
+    }
+    return issueNumber;
+}
+exports.getIssueNumberFromURL = getIssueNumberFromURL;
 
 
 /***/ }),
@@ -18442,6 +18517,85 @@ function onceStrict (fn) {
   f.called = false
   return f
 }
+
+
+/***/ }),
+
+/***/ 998:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const core = __importStar(__webpack_require__(470));
+const utils = __importStar(__webpack_require__(611));
+/**
+ * Get a list of issues from the current issue and post a comment
+ *
+ * @param {CommandContext} context context for this command execution
+ * @param {args} list of arguments
+ */
+function issuescomment({ owner, repo, issueNumber, issueBody, basepath }, ...args) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const message = args.length > 1 ? args.join(' ') : args[0];
+        // a little debuging info
+        core.debug(message);
+        core.debug(basepath);
+        core.debug(`/issuescomment working with ${message}`);
+        core.debug(`issue body -> ${issueBody}`);
+        const gitURLs = utils.parseExtraArgs(issueBody, 'issuescomment');
+        const filterNWO = [];
+        for (const url of gitURLs) {
+            // get list of nwo's to filter on
+            const nwo = utils.getNWO(url);
+            filterNWO.push(`${nwo.owner}/${nwo.name}`);
+        }
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        const linkedIssues = yield utils.getLinkedIssues({ owner, repo, issue_number: issueNumber }, { nwo: filterNWO });
+        core.debug(`LinkedIssues -> ${linkedIssues}`);
+        // for each issue we need to create a comment
+        for (const url of new Set(linkedIssues)) {
+            const nwo = utils.getNWO(url);
+            const refIssueNumber = utils.getIssueNumberFromURL(url);
+            try {
+                if (refIssueNumber === -1) {
+                    core.warning(`skipping issue comment for ${nwo.owner}/${nwo.name}/${refIssueNumber}`);
+                    continue;
+                }
+                // we need an admin client vs normal client because the normal client only has rights to the current issue
+                const adminclient = utils.getAdminClient();
+                yield adminclient.issues.createComment({
+                    owner: nwo.owner,
+                    repo: nwo.name,
+                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    issue_number: refIssueNumber,
+                    body: message
+                });
+            }
+            catch (error) {
+                core.warning(`Unable to create comment-> ${nwo.owner}/${nwo.name}/${refIssueNumber}`);
+                core.error(error);
+            }
+        }
+    });
+}
+exports.default = issuescomment;
 
 
 /***/ })
