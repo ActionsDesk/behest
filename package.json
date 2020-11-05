@@ -27,9 +27,10 @@
   "author": "Jason Macgowan <1389531+jasonmacgowan@users.noreply.github.com",
   "license": "MIT",
   "dependencies": {
-    "yaml": "^1.10.0",
     "@actions/core": "^1.2.6",
-    "@actions/github": "^2.0.1"
+    "@actions/github": "^2.0.1",
+    "@types/yaml": "^1.9.7",
+    "yaml": "^1.10.0"
   },
   "devDependencies": {
     "@types/jest": "^24.9.0",
