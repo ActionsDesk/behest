@@ -26,7 +26,7 @@
   "author": "Jason Macgowan <1389531+jasonmacgowan@users.noreply.github.com",
   "license": "MIT",
   "dependencies": {
-    "@actions/core": "^1.2.1",
+    "@actions/core": "^1.2.6",
     "@actions/github": "^2.0.1"
   },
   "devDependencies": {
